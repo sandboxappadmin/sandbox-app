@@ -1,53 +1,13 @@
-'use client';
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
+import DesktopGrid from './DesktopGrid';
 
-import { useRouter } from "next/navigation";
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import ButtonBase from '@mui/material/ButtonBase';
-import Avatar from '@mui/material/Avatar';
+export default async function DesktopPage() {
+    const { userId } = await auth();
 
-import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import HandymanIcon from '@mui/icons-material/Handyman';
+    if (!userId) {
+        redirect('/');
+    }
 
-const NICHES = [
-  { slug: 'real-estate', label: 'Real Estate', icon: HomeWorkIcon },
-  { slug: 'dental-med-spa', label: 'Dental & Med Spa', icon: LocalHospitalIcon },
-  { slug: 'coaching', label: 'Coaches & Consultants', icon: RecordVoiceOverIcon },
-  { slug: 'ecommerce', label: 'E-commerce', icon: ShoppingCartIcon },
-  { slug: 'agency', label: 'Marketing Agency', icon: BusinessCenterIcon },
-  { slug: 'fitness', label: 'Fitness & Gyms', icon: FitnessCenterIcon },
-  { slug: 'home-services', label: 'Home Services', icon: HandymanIcon },
-];
-
-export default function DesktopScreen() {
-    const router = useRouter();
-
-    return (
-        <Box sx={{ minHeight: '100vh', bgcolor: 'grey.900', color: 'common.white', py: 6, px: 3, }}>
-            <Box sx={{ textAlign: 'center', mb: 6 }}>
-                <Typography variant="h4" sx={{ fontWeight: 600 }}> Sandbox App </Typography>
-                <Typography variant="body1" sx={{ color: 'grey.400', mt: 0.5 }}> Choose a workspace to open </Typography>
-            </Box>
-
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 4, maxWidth: 900, mx: 'auto', }}>
-                {NICHES.map(({ slug, label, icon: Icon }) => (
-                <ButtonBase 
-                    key={slug} 
-                    onClick={() => router.push(`/niche/${slug}/dashboard`)} 
-                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, borderRadius: 3, p: 2, transition: 'transform 0.15s ease, background-color 0.15s ease', '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', transform: 'scale(1.05)', },
-                    }}>
-                    <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main', }}>
-                    <Icon fontSize="medium" />
-                    </Avatar>
-                    <Typography variant="caption" sx={{ textAlign: 'center', color: 'common.white' }}> {label} </Typography>
-                </ButtonBase>
-                ))}
-            </Box>
-        </Box>
-    );
+    return <DesktopGrid />;
 }
