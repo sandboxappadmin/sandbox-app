@@ -10,9 +10,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import AddIcon from '@mui/icons-material/Add';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { createContact } from './actions';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
+import { createContact, updateContact, deleteContact } from './actions';
 
 type Contact = {
   id: string;
@@ -23,22 +26,7 @@ type Contact = {
   createdAt: string;
 };
 
-const columns: GridColDef[] = [
-  {
-    field: 'name',
-    headerName: 'Name',
-    flex: 1,
-    valueGetter: (_value, row) => `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim() || '—',
-  },
-  { field: 'email', headerName: 'Email', flex: 1 },
-  { field: 'phone', headerName: 'Phone', flex: 1 },
-  {
-    field: 'createdAt',
-    headerName: 'Created',
-    flex: 1,
-    valueGetter: (value) => new Date(value).toLocaleDateString(),
-  },
-];
+const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '' };
 
 export default function ContactsClient({
   slug,
@@ -48,16 +36,90 @@ export default function ContactsClient({
   initialContacts: Contact[];
 }) {
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '' });
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [error, setError] = useState<string | null>(null);
+
+  const openCreateDialog = () => {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setError(null);
+    setOpen(true);
+  };
+
+  const openEditDialog = (contact: Contact) => {
+    setEditingId(contact.id);
+    setForm({
+      firstName: contact.firstName ?? '',
+      lastName: contact.lastName ?? '',
+      email: contact.email ?? '',
+      phone: contact.phone ?? '',
+    });
+    setError(null);
+    setOpen(true);
+  };
 
   const handleSubmit = () => {
     startTransition(async () => {
-      await createContact(slug, form);
-      setForm({ firstName: '', lastName: '', email: '', phone: '' });
+      if (editingId) {
+        await updateContact(slug, editingId, form);
+      } else {
+        await createContact(slug, form);
+      }
       setOpen(false);
     });
   };
+
+  const handleDelete = (contact: Contact) => {
+    const name = `${contact.firstName ?? ''} ${contact.lastName ?? ''}`.trim() || 'this contact';
+    if (!window.confirm(`Delete ${name}? This can't be undone.`)) return;
+
+    startTransition(async () => {
+      try {
+        await deleteContact(slug, contact.id);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete contact.');
+      }
+    });
+  };
+
+  const columns: GridColDef[] = [
+    {
+      field: 'name',
+      headerName: 'Name',
+      flex: 1,
+      valueGetter: (_value, row) => `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim() || '—',
+    },
+    { field: 'email', headerName: 'Email', flex: 1 },
+    { field: 'phone', headerName: 'Phone', flex: 1 },
+    {
+      field: 'createdAt',
+      headerName: 'Created',
+      flex: 1,
+      valueGetter: (value) => new Date(value).toLocaleDateString(),
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: '',
+      width: 100,
+      getActions: (params) => [
+        <GridActionsCellItem
+          key="edit"
+          icon={<EditIcon fontSize="small" />}
+          label="Edit"
+          onClick={() => openEditDialog(params.row)}
+        />,
+        <GridActionsCellItem
+          key="delete"
+          icon={<DeleteIcon fontSize="small" />}
+          label="Delete"
+          onClick={() => handleDelete(params.row)}
+        />,
+      ],
+    },
+  ];
 
   return (
     <Box>
@@ -65,10 +127,16 @@ export default function ContactsClient({
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Contacts
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
           Add Contact
         </Button>
       </Box>
+
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <Box sx={{ height: 500, bgcolor: 'background.paper', borderRadius: 1 }}>
         <DataGrid
@@ -82,7 +150,7 @@ export default function ContactsClient({
       </Box>
 
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Add Contact</DialogTitle>
+        <DialogTitle>{editingId ? 'Edit Contact' : 'Add Contact'}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField

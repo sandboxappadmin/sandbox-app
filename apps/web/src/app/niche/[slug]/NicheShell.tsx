@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -11,15 +12,18 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import BoltIcon from '@mui/icons-material/Bolt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MenuIcon from '@mui/icons-material/Menu';
 import { UserButton } from '@clerk/nextjs';
 
 const DRAWER_WIDTH = 240;
+const MINI_WIDTH = 68;
 
 export default function NicheShell({
   slug,
@@ -32,6 +36,7 @@ export default function NicheShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
     { label: 'Dashboard', icon: DashboardIcon, href: `/niche/${slug}/dashboard` },
@@ -41,41 +46,67 @@ export default function NicheShell({
     { label: 'Settings', icon: SettingsIcon, href: `/niche/${slug}/settings` },
   ];
 
+  const drawerWidth = collapsed ? MINI_WIDTH : DRAWER_WIDTH;
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Drawer
         variant="permanent"
         sx={{
-          width: DRAWER_WIDTH,
+          width: drawerWidth,
           flexShrink: 0,
-          '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' },
+          transition: 'width 0.2s ease',
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
+            transition: 'width 0.2s ease',
+          },
         }}
       >
-        <Toolbar>
-          <IconButton onClick={() => router.push('/desktop')} sx={{ mr: 1 }}>
-            <ArrowBackIcon fontSize="small" />
+        <Toolbar sx={{ px: collapsed ? 1 : 2 }}>
+          {!collapsed && (
+            <>
+              <IconButton onClick={() => router.push('/desktop')} sx={{ mr: 1 }}>
+                <ArrowBackIcon fontSize="small" />
+              </IconButton>
+              <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600, flexGrow: 1 }}>
+                {label}
+              </Typography>
+            </>
+          )}
+          <IconButton onClick={() => setCollapsed((c) => !c)} sx={{ ml: collapsed ? 'auto' : 0, mr: collapsed ? 'auto' : 0 }}>
+            <MenuIcon fontSize="small" />
           </IconButton>
-          <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600 }}>
-            {label}
-          </Typography>
         </Toolbar>
         <List>
-          {navItems.map(({ label: itemLabel, icon: Icon, href }) => (
-            <ListItemButton
-              key={href}
-              selected={pathname === href}
-              onClick={() => router.push(href)}
-            >
-              <ListItemIcon>
-                <Icon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={itemLabel} />
-            </ListItemButton>
-          ))}
+          {navItems.map(({ label: itemLabel, icon: Icon, href }) => {
+            const button = (
+              <ListItemButton
+                key={href}
+                selected={pathname === href}
+                onClick={() => router.push(href)}
+                sx={{ justifyContent: collapsed ? 'center' : 'flex-start', px: collapsed ? 1.5 : 2 }}
+              >
+                <ListItemIcon sx={{ minWidth: collapsed ? 'auto' : 40, justifyContent: 'center' }}>
+                  <Icon fontSize="small" />
+                </ListItemIcon>
+                {!collapsed && <ListItemText primary={itemLabel} />}
+              </ListItemButton>
+            );
+
+            return collapsed ? (
+              <Tooltip key={href} title={itemLabel} placement="right">
+                {button}
+              </Tooltip>
+            ) : (
+              button
+            );
+          })}
         </List>
       </Drawer>
 
-      <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <AppBar
           position="static"
           color="default"
@@ -87,7 +118,7 @@ export default function NicheShell({
           </Toolbar>
         </AppBar>
 
-        <Box sx={{ p: 4 }}>{children}</Box>
+        <Box sx={{ p: 4, flexGrow: 1, minWidth: 0 }}>{children}</Box>
       </Box>
     </Box>
   );
