@@ -35,23 +35,27 @@ export async function POST(req: Request) {
 
   const evt = JSON.parse(body);
 
-  if (evt.type === 'user.created') {
+    if (evt.type === 'user.created') {
     const { id: clerkId, email_addresses, first_name, last_name } = evt.data;
     const email = email_addresses?.[0]?.email_address ?? '';
 
-    await prisma.account.create({
-      data: {
-        name: `${first_name ?? ''}'s Workspace`.trim(),
-        users: {
-          create: {
-            clerkId,
-            email,
-            name: [first_name, last_name].filter(Boolean).join(' '),
-            role: 'OWNER',
+    const existing = await prisma.user.findUnique({ where: { clerkId } });
+
+    if (!existing) {
+      await prisma.account.create({
+        data: {
+          name: `${first_name ?? ''}'s Workspace`.trim(),
+          users: {
+            create: {
+              clerkId,
+              email,
+              name: [first_name, last_name].filter(Boolean).join(' '),
+              role: 'OWNER',
+            },
           },
         },
-      },
-    });
+      });
+    }
   }
 
   return NextResponse.json({ received: true });
