@@ -1,9 +1,6 @@
-import { auth } from '@clerk/nextjs/server';
-import { redirect, notFound } from 'next/navigation';
-import { prisma } from '@repo/database';
-import { getNicheBySlug } from '@/lib/niches';
-import Box from '@mui/material/Box';
+import { getCurrentNicheInstall } from '@/lib/niche-server';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 export default async function NicheDashboardPage({
   params,
@@ -11,30 +8,15 @@ export default async function NicheDashboardPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { userId } = await auth();
-  if (!userId) redirect('/');
-
-  const niche = getNicheBySlug(slug);
-  if (!niche) notFound();
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) redirect('/');
-
-  const install = await prisma.nicheInstall.findFirst({
-    where: { accountId: user.accountId, niche: niche.type },
-  });
-
-  if (!install) redirect('/desktop');
+  const { install } = await getCurrentNicheInstall(slug);
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4">{install.label}</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-        Workspace ID: {install.id}
+    <Box>
+      <Typography variant="h4" sx={{ fontWeight: 600 }}>
+        {install.label}
       </Typography>
-      <Typography variant="body1" sx={{ mt: 3 }}>
-        This is a real, isolated workspace tied to your account. Contacts, pipelines, and
-        workflows will render here next.
+      <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+        Overview for this workspace will go here.
       </Typography>
     </Box>
   );
