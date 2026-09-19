@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from "next/navigation";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -14,7 +13,8 @@ import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import HandymanIcon from '@mui/icons-material/Handyman';
 
-import { openNiche } from "./actions";
+import { openNiche } from './actions';
+import DesktopHeader from './DesktopHeader';
 
 const NICHE_TILES = [
   { slug: 'real-estate', label: 'Real Estate', icon: HomeWorkIcon },
@@ -28,48 +28,52 @@ const NICHE_TILES = [
 
 export default function DesktopGrid() {
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.900', color: 'common.white', py: 6, px: 3 }}>
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600 }}>
-          Sandbox App
-        </Typography>
-        <Typography variant="body1" sx={{ color: 'grey.400', mt: 0.5 }}>
-          Choose a workspace to open
-        </Typography>
-      </Box>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <DesktopHeader />
 
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-          gap: 4,
-          maxWidth: 900,
-          mx: 'auto',
-        }}
-      >
-        {NICHE_TILES.map(({ slug, label, icon: Icon }) => (
-          <ButtonBase
-            key={slug}
-            onClick={() => openNiche(slug)}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 1,
-              borderRadius: 3,
-              p: 2,
-              transition: 'transform 0.15s ease, background-color 0.15s ease',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', transform: 'scale(1.05)' },
-            }}
-          >
-            <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main' }}>
-              <Icon fontSize="medium" />
-            </Avatar>
-            <Typography variant="caption" sx={{ textAlign: 'center', color: 'common.white' }}>
-              {label}
-            </Typography>
-          </ButtonBase>
-        ))}
+      <Box sx={{ py: 6, px: 3 }}>
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Typography variant="h4" sx={{ fontWeight: 600 }}>
+            Choose a Workspace
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+            Select a niche to open its dashboard
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+            gap: 4,
+            maxWidth: 900,
+            mx: 'auto',
+          }}
+        >
+          {NICHE_TILES.map(({ slug, label, icon: Icon }) => (
+            <ButtonBase
+              key={slug}
+              onClick={() => openNiche(slug)}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1,
+                borderRadius: 3,
+                p: 2,
+                transition: 'transform 0.15s ease, background-color 0.15s ease',
+                '&:hover': { bgcolor: 'action.hover', transform: 'scale(1.05)' },
+              }}
+            >
+              <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main' }}>
+                <Icon fontSize="medium" />
+              </Avatar>
+              <Typography variant="caption" sx={{ textAlign: 'center', color: 'text.primary' }}>
+                {label}
+              </Typography>
+            </ButtonBase>
+          ))}
+        </Box>
       </Box>
     </Box>
   );

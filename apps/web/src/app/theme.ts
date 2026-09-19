@@ -1,10 +1,18 @@
 'use client';
 
-import { createTheme } from "@mui/material/styles";
+import { createTheme } from '@mui/material/styles';
 
-// Standard MUI defaults for now — swap values here later
-// once you're ready to establish Sandbox App's own brand colors.
+// Standard MUI defaults, explicitly pinned to light mode for now.
+// Written as a function so a dark variant / toggle can be added later
+// without restructuring how the theme is built.
+export function getTheme(mode: 'light' | 'dark' = 'light') {
+  return createTheme({
+    palette: {
+      mode,
+    },
+  });
+}
 
-const theme = createTheme();
+const theme = getTheme('light');
 
 export default theme;
