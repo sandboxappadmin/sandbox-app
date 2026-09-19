@@ -1,0 +1,299 @@
+// packages/database/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// ACCOUNT & USERS — the tenant boundary for login/billing/team
+// ============================================================
+
+model Account {
+  id String @id @default(cuid())
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+  nicheInstalls NicheInstall[]
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  AGENT
+}
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  name String?
+  role Role @default(AGENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id])
+  accountId String
+}
+
+// ============================================================
+// NICHE INSTALL — the isolated "installed app" workspace.
+// Every CRM entity below hangs off this, not off Account directly.
+// This is what makes Real Estate data and Coaching data fully
+// separate even though they live under the same login/billing.
+// ============================================================
+
+enum NicheType {
+  REAL_ESTATE
+  DENTAL_MED_SPA
+  COACHING
+  ECOMMERCE
+  AGENCY
+  FITNESS
+  HOME_SERVICES
+}
+
+model NicheInstall {
+  id String @id @default(cuid())
+  niche NicheType
+  label String // e.g. "My Real Estate Workspace" - user-editable display name
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id])
+  accountId String
+
+  contacts Contact[]
+  customFieldsDefs CustomFieldDefinition[]
+  tags Tag[]
+  pipelines Pipeline[]
+  workflows Workflow[]
+  conversations Conversation[]
+
+  @@index([accountId])
+}
+
+// ============================================================
+// CONTACTS — with dynamic custom fields
+// ============================================================
+
+// Defines WHAT custom fields exist for a given niche workspace,
+// so the UI knows how to render a form (label, type, options).
+
+model CustomFieldDefinition {
+  id String @id @default(cuid())
+  key String // stable machine key, e.g. "budget_range"
+  label String // human label, e.g. "Budget Range"
+  type CustomFieldType
+  options Json? // for DROPDOWN type: ["0-50K", "50-100K", ...]
+  createdAt DateTime @default(now())
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  @@unique([nicheInstallId, key])
+}
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  DATE
+  BOOLEAN
+  DROPDOWN
+}
+
+model Contact {
+  id String @id @default(cuid())
+  firstName String?
+  lastName String?
+  email String?
+  phone String?
+  // Actual custom field VALUES live here as JSON, keyed by
+  // CustomFieldDefinition.key. Keeps writes cheap and avoids a
+  // giant EAV join table, while CustomFieldDefinition still gives
+  // the UI a real schema to render forms/filters against.
+  customFields Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  tags Tag[]
+  opportunities Opportunity[]
+  conversations Conversation[]
+
+  @@index([nicheInstallId])
+}
+
+model Tag {
+  id String @id @default(cuid())
+  name String
+  color String? // hex code for UI chips
+  createdAt DateTime @default(now())
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  contacts Contact[]
+
+  @@unique([nicheInstallId, name])
+}
+
+// ============================================================
+// PIPELINES — Pipeline -> Stage -> Opportunity
+// ============================================================
+
+model Pipeline {
+  id String @id @default(cuid())
+  name String
+  createdAt DateTime @default(now())
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  stages Stage[]
+
+  @@index([nicheInstallId])
+}
+
+model Stage {
+  id String @id @default(cuid())
+  name String
+  order Int // controls left-to-right kanban column position
+
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id])
+  pipelineId String
+
+  opportunities Opportunity[]
+
+  @@index([pipelineId])
+}
+
+model Opportunity {
+  id String @id @default(cuid())
+  name String
+  value Decimal? @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stage Stage @relation(fields: [stageId], references: [id])
+  stageId String
+
+  contact Contact @relation(fields: [contactId], references: [id])
+  contactId String
+
+  @@index([stageId])
+  @@index([contactId])
+}
+
+// ============================================================
+// WORKFLOWS — Workflow -> Trigger -> Step/Action
+// This feeds the BullMQ automation engine we planned earlier.
+// ============================================================
+
+model Workflow {
+  id String @id @default(cuid())
+  name String
+  isActive Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  triggers WorkflowTrigger[]
+  steps WorkflowStep[]
+
+  @@index([nicheInstallId])
+}
+
+enum TriggerType {
+  CONTACT_CREATED
+  TAG_ADDED
+  FORM_SUBMITTED
+  STAGE_CHANGED
+  APPOINTMENT_BOOKED
+}
+
+model WorkflowTrigger {
+  id String @id @default(cuid())
+  type TriggerType
+  config Json? // e.g. { "tagId": "..." } for TAG_ADDED
+
+  workflow Workflow @relation(fields: [workflowId], references: [id])
+  workflowId String
+
+  @@index([workflowId])
+}
+
+enum ActionType {
+  SEND_EMAIL
+  SEND_SMS
+  ADD_TAG
+  UPDATE_FIELD
+  WAIT
+  WEBHOOK
+}
+
+model WorkflowStep {
+  id String @id @default(cuid())
+  order Int // execution order within the workflow
+  type ActionType
+  config Json // action-specific payload, e.g. { "templateId": "...", "delayHours": 24 }
+
+  workflow Workflow @relation(fields: [workflowId], references: [id])
+  workflowId String
+
+  @@index([workflowId])
+}
+
+// ============================================================
+// CONVERSATIONS — unifies Email/SMS/etc into one thread per contact
+// ============================================================
+
+enum MessageChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  INTERNAL_NOTE
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+model Conversation {
+  id String @id @default(cuid())
+  channel MessageChannel
+  createdAt DateTime @default(now())
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  contact Contact @relation(fields: [contactId], references: [id])
+  contactId String
+
+  messages Message[]
+
+  @@index([nicheInstallId])
+  @@index([contactId])
+}
+
+model Message {
+  id String @id @default(cuid())
+  direction MessageDirection
+  createdAt DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String
+
+  @@index([conversationId])
+}
