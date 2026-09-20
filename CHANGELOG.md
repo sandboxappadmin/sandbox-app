@@ -73,3 +73,9 @@ All notable changes to Sandbox App will be documented here.
 ### Fixed
 - Split Accounts DataGrid into a Client Component (same pattern as Contacts) to resolve a server/client boundary error
 
+## [0.5.1] - 2026-09-20
+
+### Added
+- Niche-specific default pipeline stages for all 7 niches (e.g. Coaching gets "Discovery Call Booked", Real Estate gets "Showing Scheduled")
+- Confirmed multi-tenant + niche isolation holds correctly under real usage: separate contacts, pipelines, and stage sets per niche workspace on the same account
+

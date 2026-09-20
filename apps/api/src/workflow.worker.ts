@@ -1,6 +1,9 @@
 import { Worker, Job } from 'bullmq';
 import { WORKFLOW_QUEUE_NAME, workflowQueue, createWorkerConnection, type WorkflowJobData } from '@repo/queue';
 import { prisma } from '@repo/database';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function processStep(step: { type: string; config: any }, contactId: string) {
   switch (step.type) {
@@ -29,11 +32,38 @@ async function processStep(step: { type: string; config: any }, contactId: strin
       break;
     }
 
-    case 'SEND_EMAIL':
+        case 'SEND_EMAIL': {
+      const message = step.config?.message;
+      if (!message) return;
+
+      const contact = await prisma.contact.findUnique({ where: { id: contactId } });
+      if (!contact?.email) {
+        console.log(`[workflow] Contact ${contactId} has no email address, skipping SEND_EMAIL step`);
+        return;
+      }
+
+            try {
+        const { data, error } = await resend.emails.send({
+          from: 'Sandbox App <onboarding@resend.dev>',
+          to: contact.email,
+          subject: step.config?.subject || 'A message from your workspace',
+          text: message,
+        });
+
+        if (error) {
+          console.error(`[workflow] Resend rejected the email to ${contact.email}:`, error.message);
+        } else {
+          console.log(`[workflow] Sent email to ${contact.email}, id: ${data?.id}`);
+        }
+      } catch (err) {
+        console.error('[workflow] Failed to send email:', err);
+      }
+      break;
+    }
+
     case 'SEND_SMS': {
-      console.log(
-        `[workflow] (stub) Would ${step.type === 'SEND_EMAIL' ? 'email' : 'text'} contact ${contactId}: "${step.config?.message ?? ''}"`
-      );
+      // Twilio isn't set up yet — still a stub for now.
+      console.log(`[workflow] (stub) Would text contact ${contactId}: "${step.config?.message ?? ''}"`);
       break;
     }
 

@@ -69,7 +69,29 @@ function StepConfigFields({
       />
     );
   }
-  if (step.type === 'SEND_EMAIL' || step.type === 'SEND_SMS') {
+    if (step.type === 'SEND_EMAIL') {
+    return (
+      <Stack spacing={1}>
+        <TextField
+          label="Subject"
+          size="small"
+          fullWidth
+          value={step.config.subject ?? ''}
+          onChange={(e) => onChange({ ...step.config, subject: e.target.value })}
+        />
+        <TextField
+          label="Message"
+          size="small"
+          fullWidth
+          multiline
+          minRows={2}
+          value={step.config.message ?? ''}
+          onChange={(e) => onChange({ ...step.config, message: e.target.value })}
+        />
+      </Stack>
+    );
+  }
+  if (step.type === 'SEND_SMS') {
     return (
       <TextField
         label="Message"
@@ -79,7 +101,7 @@ function StepConfigFields({
         minRows={2}
         value={step.config.message ?? ''}
         onChange={(e) => onChange({ message: e.target.value })}
-        helperText="Sending isn't wired up yet — this just saves the intended message for now."
+        helperText="SMS sending isn't wired up yet (Twilio comes later) — this just saves the message for now."
       />
     );
   }
