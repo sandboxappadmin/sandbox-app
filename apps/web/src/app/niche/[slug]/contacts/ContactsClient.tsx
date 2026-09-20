@@ -15,6 +15,12 @@ import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Popover from '@mui/material/Popover';
 import Autocomplete from '@mui/material/Autocomplete';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -28,6 +34,17 @@ import {
 } from './actions';
 
 type Tag = { id: string; name: string };
+
+type CustomFieldType = 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'DROPDOWN';
+
+type CustomFieldDef = {
+  id: string;
+  key: string;
+  label: string;
+  type: CustomFieldType;
+  options: string[] | null;
+};
+
 type Contact = {
   id: string;
   firstName: string | null;
@@ -36,9 +53,116 @@ type Contact = {
   phone: string | null;
   createdAt: string;
   tags: Tag[];
+  customFields: Record<string, unknown>;
 };
 
-const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '' };
+const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', customFields: {} as Record<string, unknown> };
+
+// Sensible default value per type, used when a contact has no value yet
+// for a definition (new definitions added after old contacts existed).
+function defaultValueFor(type: CustomFieldType): unknown {
+  switch (type) {
+    case 'BOOLEAN':
+      return false;
+    case 'NUMBER':
+      return '';
+    case 'DATE':
+      return '';
+    case 'DROPDOWN':
+      return '';
+    case 'TEXT':
+    default:
+      return '';
+  }
+}
+
+function seedCustomFields(
+  defs: CustomFieldDef[],
+  existing: Record<string, unknown> | undefined
+): Record<string, unknown> {
+  const seeded: Record<string, unknown> = {};
+  for (const def of defs) {
+    const value = existing?.[def.key];
+    seeded[def.key] = value === undefined || value === null ? defaultValueFor(def.type) : value;
+  }
+  return seeded;
+}
+
+function CustomFieldInput({
+  def,
+  value,
+  onChange,
+}: {
+  def: CustomFieldDef;
+  value: unknown;
+  onChange: (value: unknown) => void;
+}) {
+  switch (def.type) {
+    case 'BOOLEAN':
+      return (
+        <FormControlLabel
+          control={
+            <Switch
+              checked={Boolean(value)}
+              onChange={(e) => onChange(e.target.checked)}
+            />
+          }
+          label={def.label}
+        />
+      );
+    case 'DROPDOWN':
+      return (
+        <FormControl fullWidth>
+          <InputLabel>{def.label}</InputLabel>
+          <Select
+            label={def.label}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {(def.options ?? []).map((opt) => (
+              <MenuItem key={opt} value={opt}>
+                {opt}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      );
+    case 'DATE':
+      return (
+        <TextField
+          label={def.label}
+          type="date"
+          value={(value as string)?.slice(0, 10) ?? ''}
+          onChange={(e) => onChange(e.target.value)}
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+      );
+    case 'NUMBER':
+      return (
+        <TextField
+          label={def.label}
+          type="number"
+          value={value ?? ''}
+          onChange={(e) => onChange(e.target.value)}
+          fullWidth
+        />
+      );
+    case 'TEXT':
+    default:
+      return (
+        <TextField
+          label={def.label}
+          value={(value as string) ?? ''}
+          onChange={(e) => onChange(e.target.value)}
+          fullWidth
+        />
+      );
+  }
+}
 
 function TagsCell({
   slug,
@@ -121,10 +245,12 @@ export default function ContactsClient({
   slug,
   initialContacts,
   allTags,
+  customFieldDefs,
 }: {
   slug: string;
   initialContacts: Contact[];
   allTags: Tag[];
+  customFieldDefs: CustomFieldDef[];
 }) {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -134,7 +260,7 @@ export default function ContactsClient({
 
   const openCreateDialog = () => {
     setEditingId(null);
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, customFields: seedCustomFields(customFieldDefs, undefined) });
     setError(null);
     setOpen(true);
   };
@@ -146,6 +272,7 @@ export default function ContactsClient({
       lastName: contact.lastName ?? '',
       email: contact.email ?? '',
       phone: contact.phone ?? '',
+      customFields: seedCustomFields(customFieldDefs, contact.customFields),
     });
     setError(null);
     setOpen(true);
@@ -276,6 +403,27 @@ export default function ContactsClient({
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
               fullWidth
             />
+
+            {customFieldDefs.length > 0 && (
+              <>
+                <Typography variant="overline" color="text.secondary" sx={{ mt: 1 }}>
+                  Custom Fields
+                </Typography>
+                {customFieldDefs.map((def) => (
+                  <CustomFieldInput
+                    key={def.id}
+                    def={def}
+                    value={form.customFields[def.key]}
+                    onChange={(value) =>
+                      setForm({
+                        ...form,
+                        customFields: { ...form.customFields, [def.key]: value },
+                      })
+                    }
+                  />
+                ))}
+              </>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>

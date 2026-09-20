@@ -32,19 +32,30 @@ async function processStep(step: { type: string; config: any }, contactId: strin
       break;
     }
 
-        case 'SEND_EMAIL': {
+            case 'SEND_EMAIL': {
       const message = step.config?.message;
       if (!message) return;
 
-      const contact = await prisma.contact.findUnique({ where: { id: contactId } });
+      const contact = await prisma.contact.findUnique({
+        where: { id: contactId },
+        include: { nicheInstall: true },
+      });
       if (!contact?.email) {
         console.log(`[workflow] Contact ${contactId} has no email address, skipping SEND_EMAIL step`);
         return;
       }
 
-            try {
+      const verifiedDomain = await prisma.sendingDomain.findFirst({
+        where: { accountId: contact.nicheInstall.accountId, status: 'VERIFIED' },
+      });
+
+      const fromAddress = verifiedDomain
+        ? `Sandbox App <hello@${verifiedDomain.domain}>`
+        : process.env.EMAIL_FROM_ADDRESS || 'Sandbox App <onboarding@resend.dev>';
+
+      try {
         const { data, error } = await resend.emails.send({
-                    from: process.env.EMAIL_FROM_ADDRESS || 'Sandbox App <onboarding@resend.dev>',
+          from: fromAddress,
           to: contact.email,
           subject: step.config?.subject || 'A message from your workspace',
           text: message,
@@ -53,7 +64,7 @@ async function processStep(step: { type: string; config: any }, contactId: strin
         if (error) {
           console.error(`[workflow] Resend rejected the email to ${contact.email}:`, error.message);
         } else {
-          console.log(`[workflow] Sent email to ${contact.email}, id: ${data?.id}`);
+          console.log(`[workflow] Sent email to ${contact.email} from ${fromAddress}, id: ${data?.id}`);
         }
       } catch (err) {
         console.error('[workflow] Failed to send email:', err);

@@ -39,7 +39,7 @@ export default function DesktopHeader({ isSuperAdmin = false }: { isSuperAdmin?:
               <NotificationsNoneIcon />
             </Badge>
           </IconButton>
-          <IconButton aria-label="settings">
+                    <IconButton component={Link} href="/account-settings" aria-label="account settings">
             <SettingsIcon />
           </IconButton>
           <UserButton />

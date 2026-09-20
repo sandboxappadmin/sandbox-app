@@ -101,3 +101,12 @@ All notable changes to Sandbox App will be documented here.
 ### Learned
 - When a domain is already used for email elsewhere (any ESP), always verify a fresh, dedicated subdomain for a new sending service rather than reusing an existing one — SPF only supports one record per exact hostname
 
+## [0.7.0] - 2026-09-20
+
+### Added
+- Custom field values now render and save on the Contact form (Text/Number/Date/Boolean/Dropdown), matching the definitions configured in per-niche Settings
+- Server-side revalidation of submitted custom field values against the niche's live CustomFieldDefinition list before persisting, preventing stale or tampered keys/types from being written to the Contact record
+
+### Fixed
+- Sending domain "Refresh" button was calling Resend's verify() (which re-triggers DNS verification and resets status to pending) instead of a read-only status check — domains would flip back to "Pending" every time a user checked on an already-verified domain
+

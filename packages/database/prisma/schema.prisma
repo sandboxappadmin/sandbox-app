@@ -22,6 +22,7 @@ model Account {
 
   users User[]
   nicheInstalls NicheInstall[]
+    sendingDomains SendingDomain[]
 }
 
 enum Role {
@@ -297,4 +298,25 @@ model Message {
   conversationId String
 
   @@index([conversationId])
+}
+
+enum DomainStatus {
+  PENDING
+  VERIFIED
+  FAILED
+}
+
+model SendingDomain {
+  id             String       @id @default(cuid())
+  domain         String
+  resendDomainId String       @unique
+  status         DomainStatus @default(PENDING)
+  records        Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  account   Account @relation(fields: [accountId], references: [id])
+  accountId String
+
+  @@unique([accountId, domain])
 }
