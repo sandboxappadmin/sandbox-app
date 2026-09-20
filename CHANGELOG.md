@@ -45,3 +45,11 @@ All notable changes to Sandbox App will be documented here.
 ### Added
 - Tags column on Contacts screen: view, add (with autocomplete), and remove tags inline
 - Automated tags from Workflows (e.g. "Hot Lead") are now visible directly on the contact record
+
+## [0.3.2] - 2026-09-20
+
+### Added
+- Stage Changed trigger for Workflows, with optional "only this specific stage" targeting
+- Dragging an opportunity between pipeline stages now fires matching active workflows
+- Workflow list now shows a readable trigger summary (e.g. "Moved to 'Qualified'") instead of just the raw trigger type
+

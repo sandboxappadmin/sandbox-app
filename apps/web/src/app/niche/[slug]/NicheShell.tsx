@@ -21,6 +21,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MenuIcon from '@mui/icons-material/Menu';
 import { UserButton } from '@clerk/nextjs';
+import { getNicheBySlug } from '@/lib/niches';
+
 
 const DRAWER_WIDTH = 240;
 const MINI_WIDTH = 68;
@@ -36,7 +38,6 @@ export default function NicheShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
     { label: 'Dashboard', icon: DashboardIcon, href: `/niche/${slug}/dashboard` },
@@ -46,8 +47,10 @@ export default function NicheShell({
     { label: 'Settings', icon: SettingsIcon, href: `/niche/${slug}/settings` },
   ];
 
+    const [collapsed, setCollapsed] = useState(false);
+  const categoryLabel = getNicheBySlug(slug)?.label ?? '';
   const drawerWidth = collapsed ? MINI_WIDTH : DRAWER_WIDTH;
-
+  
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Drawer
@@ -64,15 +67,20 @@ export default function NicheShell({
           },
         }}
       >
-        <Toolbar sx={{ px: collapsed ? 1 : 2 }}>
+                <Toolbar sx={{ px: collapsed ? 1 : 2, alignItems: collapsed ? 'center' : 'flex-start', pt: collapsed ? 1 : 1.5, pb: collapsed ? 1 : 1.5 }}>
           {!collapsed && (
             <>
-              <IconButton onClick={() => router.push('/desktop')} sx={{ mr: 1 }}>
+              <IconButton onClick={() => router.push('/desktop')} sx={{ mr: 1, mt: 0.5 }}>
                 <ArrowBackIcon fontSize="small" />
               </IconButton>
-              <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600, flexGrow: 1 }}>
-                {label}
-              </Typography>
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600 }}>
+                  {label}
+                </Typography>
+                <Typography variant="caption" noWrap sx={{ color: 'text.secondary', display: 'block' }}>
+                  {categoryLabel}
+                </Typography>
+              </Box>
             </>
           )}
           <IconButton onClick={() => setCollapsed((c) => !c)} sx={{ ml: collapsed ? 'auto' : 0, mr: collapsed ? 'auto' : 0 }}>
