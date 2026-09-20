@@ -11,8 +11,10 @@ export default async function PipelinesPage({
   const { slug } = await params;
   const { install } = await getCurrentNicheInstall(slug);
 
-  const pipeline = await getOrCreatePipeline(install.id);
-
+  const { getNicheBySlug } = await import('@/lib/niches');
+  const nicheConfig = getNicheBySlug(slug);
+  const pipeline = await getOrCreatePipeline(install.id, nicheConfig?.defaultStages ?? []);
+  
   const contacts = await prisma.contact.findMany({
     where: { nicheInstallId: install.id },
     orderBy: { createdAt: 'desc' },

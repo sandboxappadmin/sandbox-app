@@ -1,8 +1,6 @@
 import { prisma } from '@repo/database';
 
-const DEFAULT_STAGES = ['New Lead', 'Contacted', 'Qualified', 'Proposal Sent', 'Won', 'Lost'];
-
-export async function getOrCreatePipeline(nicheInstallId: string) {
+export async function getOrCreatePipeline(nicheInstallId: string, defaultStages: readonly string[]) {
   const include = {
     stages: {
       orderBy: { order: 'asc' as const },
@@ -26,7 +24,7 @@ export async function getOrCreatePipeline(nicheInstallId: string) {
         nicheInstallId,
         name: 'Sales Pipeline',
         stages: {
-          create: DEFAULT_STAGES.map((name, index) => ({ name, order: index })),
+          create: defaultStages.map((name, index) => ({ name, order: index })),
         },
       },
       include,

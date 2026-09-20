@@ -62,3 +62,14 @@ All notable changes to Sandbox App will be documented here.
 ### Fixed
 - Removed deprecated `alignItems` direct prop usage on MUI Stack components (moved to sx)
 
+## [0.5.0] - 2026-09-20
+
+### Added
+- Super Admin panel at /admin, gated by SUPER_ADMIN_EMAILS allow-list (independent of per-account roles)
+- Platform Overview: real-time counts (accounts, users, niche workspaces, contacts, workflows) plus niche-type breakdown
+- Accounts screen: read-only list of every tenant account, owner email, user count, and installed niches
+- Discreet admin entry point (shield icon) in Desktop header, visible only to allow-listed users
+
+### Fixed
+- Split Accounts DataGrid into a Client Component (same pattern as Contacts) to resolve a server/client boundary error
+

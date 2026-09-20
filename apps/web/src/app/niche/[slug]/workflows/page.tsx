@@ -17,8 +17,10 @@ export default async function WorkflowsPage({
     orderBy: { createdAt: 'desc' },
   });
 
-  const pipeline = await getOrCreatePipeline(install.id);
-
+  const { getNicheBySlug } = await import('@/lib/niches');
+  const nicheConfig = getNicheBySlug(slug);
+  const pipeline = await getOrCreatePipeline(install.id, nicheConfig?.defaultStages ?? []);
+  
   const serialized = workflows.map((w) => ({
     id: w.id,
     name: w.name,
