@@ -53,3 +53,12 @@ All notable changes to Sandbox App will be documented here.
 - Dragging an opportunity between pipeline stages now fires matching active workflows
 - Workflow list now shows a readable trigger summary (e.g. "Moved to 'Qualified'") instead of just the raw trigger type
 
+## [0.4.0] - 2026-09-20
+
+### Added
+- Settings page per niche workspace: rename workspace, manage tags (add/delete), manage custom field definitions (Text/Number/Date/Boolean/Dropdown)
+- Permanent niche category label shown alongside the custom workspace name (sidebar + Settings), so renaming a workspace never obscures which niche it belongs to
+
+### Fixed
+- Removed deprecated `alignItems` direct prop usage on MUI Stack components (moved to sx)
+

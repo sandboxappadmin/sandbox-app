@@ -26,10 +26,10 @@ const NICHE_TILES = [
   { slug: 'home-services', label: 'Home Services', icon: HandymanIcon },
 ];
 
-export default function DesktopGrid() {
+export default function DesktopGrid({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <DesktopHeader />
+      <DesktopHeader isSuperAdmin={isSuperAdmin} />
 
       <Box sx={{ py: 6, px: 3 }}>
         <Box sx={{ textAlign: 'center', mb: 6 }}>
