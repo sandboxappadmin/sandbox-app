@@ -44,7 +44,7 @@ async function processStep(step: { type: string; config: any }, contactId: strin
 
             try {
         const { data, error } = await resend.emails.send({
-          from: 'Sandbox App <onboarding@resend.dev>',
+                    from: process.env.EMAIL_FROM_ADDRESS || 'Sandbox App <onboarding@resend.dev>',
           to: contact.email,
           subject: step.config?.subject || 'A message from your workspace',
           text: message,

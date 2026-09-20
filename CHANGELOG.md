@@ -79,3 +79,15 @@ All notable changes to Sandbox App will be documented here.
 - Niche-specific default pipeline stages for all 7 niches (e.g. Coaching gets "Discovery Call Booked", Real Estate gets "Showing Scheduled")
 - Confirmed multi-tenant + niche isolation holds correctly under real usage: separate contacts, pipelines, and stage sets per niche workspace on the same account
 
+## [0.6.0] - 2026-09-20
+
+### Added
+- Real email sending via Resend for SEND_EMAIL workflow steps
+- Subject field added to the Send Email step config in the workflow builder
+
+### Fixed
+- Worker now correctly checks Resend's response for errors instead of only catching thrown exceptions, which previously caused failed sends to be logged as successful
+
+### Known limitations
+- Currently sending from Resend's shared test domain (onboarding@resend.dev) — can only deliver to the Resend account's own signup email until a custom domain is verified; expect spam-folder placement until then
+
