@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@repo/database';
+import { workflowQueue } from '@repo/queue';
 import { getCurrentNicheInstall } from '@/lib/niche-server';
 
 export async function createContact(
@@ -10,7 +11,7 @@ export async function createContact(
 ) {
   const { install } = await getCurrentNicheInstall(slug);
 
-  await prisma.contact.create({
+  const contact = await prisma.contact.create({
     data: {
       nicheInstallId: install.id,
       firstName: data.firstName || null,
@@ -19,6 +20,31 @@ export async function createContact(
       phone: data.phone || null,
     },
   });
+
+    // Fire any active "Contact Created" workflows for this workspace
+  const matchingWorkflows = await prisma.workflow.findMany({
+    where: {
+      nicheInstallId: install.id,
+      isActive: true,
+      triggers: { some: { type: 'CONTACT_CREATED' } },
+    },
+  });
+
+  console.log(`[trigger] Found ${matchingWorkflows.length} matching workflow(s) for niche ${install.id}`);
+
+  for (const workflow of matchingWorkflows) {
+    console.log(`[trigger] Enqueueing workflow ${workflow.id} for contact ${contact.id}`);
+    try {
+      const job = await workflowQueue.add('run-workflow', {
+        workflowId: workflow.id,
+        contactId: contact.id,
+        nicheInstallId: install.id,
+      });
+      console.log(`[trigger] Job enqueued successfully, job id: ${job.id}`);
+    } catch (err) {
+      console.error('[trigger] Failed to enqueue job:', err);
+    }
+  }
 
   revalidatePath(`/niche/${slug}/contacts`);
 }

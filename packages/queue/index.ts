@@ -1,20 +1,18 @@
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
 
-// BullMQ requires this exact option when connecting to most managed
-// Redis providers (Upstash included) — without it, BullMQ's internal
-// retry logic conflicts with how the connection is managed.
 const connection = new IORedis(process.env.REDIS_URL as string, {
   maxRetriesPerRequest: null,
+});
+
+connection.on('error', (err) => {
+  console.error('[redis] Connection error:', err.message);
 });
 
 export const WORKFLOW_QUEUE_NAME = 'workflow-execution';
 
 export const workflowQueue = new Queue(WORKFLOW_QUEUE_NAME, { connection });
 
-// The exact shape of every job enqueued when a trigger fires.
-// Both apps/web (producer) and apps/api (consumer) import this type
-// so they can never drift out of sync with each other.
 export type WorkflowJobData = {
   workflowId: string;
   contactId: string;
@@ -22,3 +20,14 @@ export type WorkflowJobData = {
 };
 
 export { connection as redisConnection };
+
+// BullMQ requires a Worker to use its own dedicated Redis connection,
+// never one shared with a Queue — a Worker's blocking polling on a
+// shared connection starves out other commands (like Queue.add())
+// on that same socket, which is exactly what was causing jobs to
+// sit in the waiting list and never get picked up.
+export function createWorkerConnection() {
+  return new IORedis(process.env.REDIS_URL as string, {
+    maxRetriesPerRequest: null,
+  });
+}
