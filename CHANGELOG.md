@@ -91,3 +91,13 @@ All notable changes to Sandbox App will be documented here.
 ### Known limitations
 - Currently sending from Resend's shared test domain (onboarding@resend.dev) — can only deliver to the Resend account's own signup email until a custom domain is verified; expect spam-folder placement until then
 
+## [0.6.1] - 2026-09-20
+
+### Fixed
+- Emails were silently failing to deliver due to an SPF PermError — the sending subdomain (mail.snbxpro.com) already had SPF records configured for an existing GHL/Mailgun setup, and Resend's added SPF record conflicted with it
+- Resolved by dedicating a separate, unused subdomain (app.snbxpro.com) exclusively to Sandbox App's email sending
+- Switched sender address from noreply@ to hello@ per Resend's deliverability guidance
+
+### Learned
+- When a domain is already used for email elsewhere (any ESP), always verify a fresh, dedicated subdomain for a new sending service rather than reusing an existing one — SPF only supports one record per exact hostname
+
