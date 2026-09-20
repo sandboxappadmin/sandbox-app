@@ -23,11 +23,13 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { createWorkflow, toggleWorkflowActive, deleteWorkflow } from './actions';
 import { TRIGGER_LABELS, ACTION_LABELS } from '@/lib/workflow-labels';
 
+type Stage = { id: string; name: string };
 type Workflow = {
   id: string;
   name: string;
   isActive: boolean;
   triggerType: string | null;
+  triggerConfig: Record<string, any>;
   steps: { type: string; config: Record<string, any> }[];
 };
 
@@ -35,6 +37,7 @@ type StepDraft = { type: string; config: Record<string, any> };
 
 const ACTION_TYPES = Object.keys(ACTION_LABELS);
 const TRIGGER_TYPES = Object.keys(TRIGGER_LABELS);
+const ANY_STAGE = '__any__';
 
 function StepConfigFields({
   step,
@@ -80,26 +83,22 @@ function StepConfigFields({
       />
     );
   }
-  return (
-    <TextField
-      label="Config (not yet built for this step type)"
-      size="small"
-      fullWidth
-      disabled
-    />
-  );
+  return <TextField label="Config (not yet built for this step type)" size="small" fullWidth disabled />;
 }
 
 export default function WorkflowsClient({
   slug,
   initialWorkflows,
+  stages,
 }: {
   slug: string;
   initialWorkflows: Workflow[];
+  stages: Stage[];
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [triggerType, setTriggerType] = useState(TRIGGER_TYPES[0]);
+  const [targetStageId, setTargetStageId] = useState(ANY_STAGE);
   const [steps, setSteps] = useState<StepDraft[]>([{ type: ACTION_TYPES[0], config: {} }]);
 
   const addStep = () => setSteps([...steps, { type: ACTION_TYPES[0], config: {} }]);
@@ -112,12 +111,19 @@ export default function WorkflowsClient({
   const resetForm = () => {
     setName('');
     setTriggerType(TRIGGER_TYPES[0]);
+    setTargetStageId(ANY_STAGE);
     setSteps([{ type: ACTION_TYPES[0], config: {} }]);
   };
 
   const handleSubmit = async () => {
     if (!name) return;
-    await createWorkflow(slug, { name, triggerType, steps });
+
+    const triggerConfig =
+      triggerType === 'STAGE_CHANGED' && targetStageId !== ANY_STAGE
+        ? { stageId: targetStageId }
+        : {};
+
+    await createWorkflow(slug, { name, triggerType, triggerConfig, steps });
     resetForm();
     setOpen(false);
   };
@@ -125,6 +131,16 @@ export default function WorkflowsClient({
   const handleDelete = async (workflow: Workflow) => {
     if (!window.confirm(`Delete "${workflow.name}"? This can't be undone.`)) return;
     await deleteWorkflow(slug, workflow.id);
+  };
+
+  const triggerSummary = (wf: Workflow) => {
+    if (!wf.triggerType) return 'No trigger';
+    const base = TRIGGER_LABELS[wf.triggerType] ?? wf.triggerType;
+    if (wf.triggerType === 'STAGE_CHANGED' && wf.triggerConfig?.stageId) {
+      const stage = stages.find((s) => s.id === wf.triggerConfig.stageId);
+      return `Moved to "${stage?.name ?? 'Unknown stage'}"`;
+    }
+    return base;
   };
 
   return (
@@ -157,12 +173,7 @@ export default function WorkflowsClient({
                   {wf.name}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-                  <Chip
-                    size="small"
-                    label={wf.triggerType ? TRIGGER_LABELS[wf.triggerType] : 'No trigger'}
-                    color="primary"
-                    variant="outlined"
-                  />
+                  <Chip size="small" label={triggerSummary(wf)} color="primary" variant="outlined" />
                   {wf.steps.map((step, i) => (
                     <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <ArrowForwardIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
@@ -189,12 +200,7 @@ export default function WorkflowsClient({
         <DialogTitle>Create Workflow</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <TextField
-              label="Workflow Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              fullWidth
-            />
+            <TextField label="Workflow Name" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
 
             <TextField
               select
@@ -209,6 +215,24 @@ export default function WorkflowsClient({
                 </MenuItem>
               ))}
             </TextField>
+
+            {triggerType === 'STAGE_CHANGED' && (
+              <TextField
+                select
+                label="Target stage"
+                value={targetStageId}
+                onChange={(e) => setTargetStageId(e.target.value)}
+                fullWidth
+                helperText="Only fire when an opportunity moves into this stage, or leave as Any stage."
+              >
+                <MenuItem value={ANY_STAGE}>Any stage</MenuItem>
+                {stages.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
 
             <Divider>Then do this...</Divider>
 
@@ -232,17 +256,9 @@ export default function WorkflowsClient({
                       </MenuItem>
                     ))}
                   </TextField>
-                  <StepConfigFields
-                    step={step}
-                    onChange={(config) => updateStepConfig(index, config)}
-                  />
+                  <StepConfigFields step={step} onChange={(config) => updateStepConfig(index, config)} />
                 </Stack>
-                <IconButton
-                  size="small"
-                  onClick={() => removeStep(index)}
-                  disabled={steps.length === 1}
-                  sx={{ mt: 0.5 }}
-                >
+                <IconButton size="small" onClick={() => removeStep(index)} disabled={steps.length === 1} sx={{ mt: 0.5 }}>
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </Box>

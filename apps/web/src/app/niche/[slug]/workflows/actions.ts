@@ -8,7 +8,7 @@ type StepInput = { type: string; config: Record<string, any> };
 
 export async function createWorkflow(
   slug: string,
-  data: { name: string; triggerType: string; steps: StepInput[] }
+  data: { name: string; triggerType: string; triggerConfig?: Record<string, any>; steps: StepInput[] }
 ) {
   const { install } = await getCurrentNicheInstall(slug);
 
@@ -18,7 +18,7 @@ export async function createWorkflow(
       name: data.name,
       isActive: false,
       triggers: {
-        create: [{ type: data.triggerType as any, config: {} }],
+        create: [{ type: data.triggerType as any, config: data.triggerConfig ?? {} }],
       },
       steps: {
         create: data.steps.map((step, index) => ({

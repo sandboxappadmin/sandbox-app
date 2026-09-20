@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@repo/database';
 import { getCurrentNicheInstall } from '@/lib/niche-server';
+import { workflowQueue } from '@repo/queue';
 
 export async function createOpportunity(
   slug: string,
@@ -42,12 +43,36 @@ export async function updateOpportunity(
 }
 
 export async function moveOpportunity(slug: string, opportunityId: string, newStageId: string) {
-  await getCurrentNicheInstall(slug);
+  const { install } = await getCurrentNicheInstall(slug);
 
-  await prisma.opportunity.update({
+  const opportunity = await prisma.opportunity.update({
     where: { id: opportunityId },
     data: { stageId: newStageId },
   });
+
+  const matchingWorkflows = await prisma.workflow.findMany({
+    where: {
+      nicheInstallId: install.id,
+      isActive: true,
+      triggers: { some: { type: 'STAGE_CHANGED' } },
+    },
+    include: { triggers: true },
+  });
+
+  for (const workflow of matchingWorkflows) {
+    const trigger = workflow.triggers.find((t) => t.type === 'STAGE_CHANGED');
+    const requiredStageId = (trigger?.config as any)?.stageId;
+
+    // Fire if no specific stage was set (fires on any move),
+    // or if the destination stage matches exactly what was configured.
+    if (!requiredStageId || requiredStageId === newStageId) {
+      await workflowQueue.add('run-workflow', {
+        workflowId: workflow.id,
+        contactId: opportunity.contactId,
+        nicheInstallId: install.id,
+      });
+    }
+  }
 
   revalidatePath(`/niche/${slug}/pipelines`);
 }

@@ -39,3 +39,9 @@ All notable changes to Sandbox App will be documented here.
 - Critical bug: Queue and Worker sharing one Redis connection silently blocked job consumption
 - Critical bug: NestJS doesn't auto-load .env files (unlike Next.js), causing worker to run with undefined credentials
 - Removed broken @nestjs/observe telemetry module (placeholder credentials caused repeated auth errors)
+
+## [0.3.1] - 2026-09-20
+
+### Added
+- Tags column on Contacts screen: view, add (with autocomplete), and remove tags inline
+- Automated tags from Workflows (e.g. "Hot Lead") are now visible directly on the contact record

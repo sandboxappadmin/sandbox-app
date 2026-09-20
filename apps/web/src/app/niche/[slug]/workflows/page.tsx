@@ -1,4 +1,5 @@
 import { getCurrentNicheInstall } from '@/lib/niche-server';
+import { getOrCreatePipeline } from '@/lib/pipeline-server';
 import { prisma } from '@repo/database';
 import WorkflowsClient from './WorkflowsClient';
 
@@ -16,13 +17,18 @@ export default async function WorkflowsPage({
     orderBy: { createdAt: 'desc' },
   });
 
+  const pipeline = await getOrCreatePipeline(install.id);
+
   const serialized = workflows.map((w) => ({
     id: w.id,
     name: w.name,
     isActive: w.isActive,
     triggerType: w.triggers[0]?.type ?? null,
+    triggerConfig: (w.triggers[0]?.config as Record<string, any>) ?? {},
     steps: w.steps.map((s) => ({ type: s.type, config: s.config as Record<string, any> })),
   }));
 
-  return <WorkflowsClient slug={slug} initialWorkflows={serialized} />;
+  const stages = pipeline.stages.map((s) => ({ id: s.id, name: s.name }));
+
+  return <WorkflowsClient slug={slug} initialWorkflows={serialized} stages={stages} />;
 }
