@@ -11,12 +11,23 @@ import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import Popover from '@mui/material/Popover';
+import Autocomplete from '@mui/material/Autocomplete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
-import { createContact, updateContact, deleteContact } from './actions';
+import {
+  createContact,
+  updateContact,
+  deleteContact,
+  addTagToContact,
+  removeTagFromContact,
+} from './actions';
 
+type Tag = { id: string; name: string };
 type Contact = {
   id: string;
   firstName: string | null;
@@ -24,16 +35,96 @@ type Contact = {
   email: string | null;
   phone: string | null;
   createdAt: string;
+  tags: Tag[];
 };
 
 const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '' };
 
+function TagsCell({
+  slug,
+  contact,
+  allTags,
+}: {
+  slug: string;
+  contact: Contact;
+  allTags: Tag[];
+}) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [value, setValue] = useState('');
+  const [, startTransition] = useTransition();
+
+  const suggestions = allTags
+    .map((t) => t.name)
+    .filter((name) => !contact.tags.some((t) => t.name === name));
+
+  const handleAdd = () => {
+    if (!value.trim()) return;
+    startTransition(() => {
+      addTagToContact(slug, contact.id, value.trim());
+    });
+    setValue('');
+    setAnchorEl(null);
+  };
+
+  return (
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center', py: 1 }}>
+      {contact.tags.map((tag) => (
+        <Chip
+          key={tag.id}
+          label={tag.name}
+          size="small"
+          onDelete={() => startTransition(() => removeTagFromContact(slug, contact.id, tag.id))}
+        />
+      ))}
+      <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
+        <AddIcon sx={{ fontSize: 16 }} />
+      </IconButton>
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Box sx={{ p: 1.5, width: 220 }}>
+          <Autocomplete
+            freeSolo
+            options={suggestions}
+            inputValue={value}
+            onInputChange={(_e, newValue) => setValue(newValue)}
+            onChange={(_e, newValue) => {
+              if (newValue) {
+                setValue(newValue);
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                autoFocus
+                size="small"
+                label="Add tag"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAdd();
+                }}
+              />
+            )}
+          />
+          <Button size="small" fullWidth sx={{ mt: 1 }} onClick={handleAdd}>
+            Add
+          </Button>
+        </Box>
+      </Popover>
+    </Box>
+  );
+}
+
 export default function ContactsClient({
   slug,
   initialContacts,
+  allTags,
 }: {
   slug: string;
   initialContacts: Contact[];
+  allTags: Tag[];
 }) {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -94,6 +185,13 @@ export default function ContactsClient({
     { field: 'email', headerName: 'Email', flex: 1 },
     { field: 'phone', headerName: 'Phone', flex: 1 },
     {
+      field: 'tags',
+      headerName: 'Tags',
+      flex: 1.5,
+      sortable: false,
+      renderCell: (params) => <TagsCell slug={slug} contact={params.row} allTags={allTags} />,
+    },
+    {
       field: 'createdAt',
       headerName: 'Created',
       flex: 1,
@@ -143,6 +241,7 @@ export default function ContactsClient({
           rows={initialContacts}
           columns={columns}
           disableRowSelectionOnClick
+          getRowHeight={() => 'auto'}
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}

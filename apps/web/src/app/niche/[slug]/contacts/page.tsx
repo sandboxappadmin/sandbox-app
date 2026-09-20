@@ -13,9 +13,14 @@ export default async function ContactsPage({
   const contacts = await prisma.contact.findMany({
     where: { nicheInstallId: install.id },
     orderBy: { createdAt: 'desc' },
+    include: { tags: true },
   });
 
-  // Serialize Dates to strings before crossing into the Client Component
+  const allTags = await prisma.tag.findMany({
+    where: { nicheInstallId: install.id },
+    orderBy: { name: 'asc' },
+  });
+
   const serialized = contacts.map((c) => ({
     id: c.id,
     firstName: c.firstName,
@@ -23,7 +28,14 @@ export default async function ContactsPage({
     email: c.email,
     phone: c.phone,
     createdAt: c.createdAt.toISOString(),
+    tags: c.tags.map((t) => ({ id: t.id, name: t.name })),
   }));
 
-  return <ContactsClient slug={slug} initialContacts={serialized} />;
+  return (
+    <ContactsClient
+      slug={slug}
+      initialContacts={serialized}
+      allTags={allTags.map((t) => ({ id: t.id, name: t.name }))}
+    />
+  );
 }

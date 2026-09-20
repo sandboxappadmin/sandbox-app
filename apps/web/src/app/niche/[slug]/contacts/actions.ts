@@ -85,3 +85,33 @@ export async function deleteContact(slug: string, contactId: string) {
 
   revalidatePath(`/niche/${slug}/contacts`);
 }
+
+export async function addTagToContact(slug: string, contactId: string, tagName: string) {
+  const { install } = await getCurrentNicheInstall(slug);
+  const trimmed = tagName.trim();
+  if (!trimmed) return;
+
+  const tag = await prisma.tag.upsert({
+    where: { nicheInstallId_name: { nicheInstallId: install.id, name: trimmed } },
+    update: {},
+    create: { nicheInstallId: install.id, name: trimmed },
+  });
+
+  await prisma.contact.update({
+    where: { id: contactId },
+    data: { tags: { connect: { id: tag.id } } },
+  });
+
+  revalidatePath(`/niche/${slug}/contacts`);
+}
+
+export async function removeTagFromContact(slug: string, contactId: string, tagId: string) {
+  await getCurrentNicheInstall(slug);
+
+  await prisma.contact.update({
+    where: { id: contactId },
+    data: { tags: { disconnect: { id: tagId } } },
+  });
+
+  revalidatePath(`/niche/${slug}/contacts`);
+}

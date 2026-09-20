@@ -24,3 +24,18 @@ All notable changes to Sandbox App will be documented here.
 ### Fixed
 - Layout overflow bug causing horizontal page scroll instead of contained kanban scroll
 - Hydration mismatch from dnd-kit accessibility attributes (resolved via client-only rendering)
+
+## [0.3.0] - 2026-09-20
+
+### Added
+- Full automation engine: BullMQ + Upstash Redis queue, NestJS worker processing jobs
+- Workflow builder UI: create workflows with a trigger + ordered action steps, active/inactive toggle
+- Contact Created trigger wired end-to-end to real workflow execution
+- ADD_TAG action fully functional (creates/applies tags via Prisma)
+- WAIT step support (re-enqueues remaining steps as a delayed job)
+- SEND_EMAIL/SEND_SMS steps stubbed (log only) pending SendGrid/Twilio integration
+
+### Fixed
+- Critical bug: Queue and Worker sharing one Redis connection silently blocked job consumption
+- Critical bug: NestJS doesn't auto-load .env files (unlike Next.js), causing worker to run with undefined credentials
+- Removed broken @nestjs/observe telemetry module (placeholder credentials caused repeated auth errors)
