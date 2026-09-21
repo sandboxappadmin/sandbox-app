@@ -17,7 +17,13 @@ import TableRow from '@mui/material/TableRow';
 import Alert from '@mui/material/Alert';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { addSendingDomain, refreshDomainStatus, removeSendingDomain } from './actions';
+import {
+  addSendingDomain,
+  refreshDomainStatus,
+  removeSendingDomain,
+  saveSmsCredential,
+  removeSmsCredential,
+} from './actions';
 
 type DnsRecord = { record: string; name: string; type: string; value: string; ttl: string };
 type Domain = { id: string; domain: string; status: string; records: DnsRecord[] };
@@ -28,10 +34,20 @@ const STATUS_COLOR: Record<string, 'default' | 'success' | 'warning' | 'error'> 
   FAILED: 'error',
 };
 
-export default function AccountSettingsClient({ domains }: { domains: Domain[] }) {
+export default function AccountSettingsClient({
+  domains,
+  smsConnected,
+}: {
+  domains: Domain[];
+  smsConnected: boolean;
+}) {
   const [newDomain, setNewDomain] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const [smsApiKey, setSmsApiKey] = useState('');
+  const [smsError, setSmsError] = useState<string | null>(null);
+  const [isSmsPending, startSmsTransition] = useTransition();
 
   const handleAdd = () => {
     setError(null);
@@ -54,6 +70,23 @@ export default function AccountSettingsClient({ domains }: { domains: Domain[] }
     startTransition(() => removeSendingDomain(domain.id));
   };
 
+  const handleSaveSms = () => {
+    setSmsError(null);
+    startSmsTransition(async () => {
+      try {
+        await saveSmsCredential(smsApiKey);
+        setSmsApiKey('');
+      } catch (err) {
+        setSmsError(err instanceof Error ? err.message : 'Failed to save API key');
+      }
+    });
+  };
+
+  const handleRemoveSms = () => {
+    if (!window.confirm('Disconnect SMSGate? Workflow SMS steps will stop sending until reconnected.')) return;
+    startSmsTransition(() => removeSmsCredential());
+  };
+
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: 4 }}>
       <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
@@ -63,7 +96,7 @@ export default function AccountSettingsClient({ domains }: { domains: Domain[] }
         Settings here apply across your whole account, not just one workspace.
       </Typography>
 
-      <Paper variant="outlined" sx={{ p: 3 }}>
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
           Sending Domains
         </Typography>
@@ -139,6 +172,58 @@ export default function AccountSettingsClient({ domains }: { domains: Domain[] }
             <Typography variant="body2" color="text.disabled">
               No custom sending domains yet — emails send from Sandbox App's default address.
             </Typography>
+          )}
+        </Stack>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+          SMS Provider
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Connect your own SMSGate account so workflow SMS steps send from your own phone number
+          and SIM. Create an account at{' '}
+          <a href="https://gosmsgate.pro" target="_blank" rel="noreferrer">
+            gosmsgate.pro
+          </a>
+          , pair your Android device, then paste your API key below.
+        </Typography>
+
+        {smsError && (
+          <Alert severity="error" onClose={() => setSmsError(null)} sx={{ mb: 2 }}>
+            {smsError}
+          </Alert>
+        )}
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Typography variant="body2">Status:</Typography>
+          <Chip
+            size="small"
+            label={smsConnected ? 'Connected' : 'Not connected'}
+            color={smsConnected ? 'success' : 'default'}
+          />
+        </Box>
+
+        <Stack direction="row" spacing={1.5}>
+          <TextField
+            size="small"
+            type="password"
+            placeholder={smsConnected ? 'Enter a new key to replace the current one' : 'sg_live_...'}
+            value={smsApiKey}
+            onChange={(e) => setSmsApiKey(e.target.value)}
+            fullWidth
+          />
+          <Button
+            variant="contained"
+            onClick={handleSaveSms}
+            disabled={isSmsPending || !smsApiKey.trim()}
+          >
+            {smsConnected ? 'Replace Key' : 'Connect'}
+          </Button>
+          {smsConnected && (
+            <Button color="error" onClick={handleRemoveSms} disabled={isSmsPending}>
+              Disconnect
+            </Button>
           )}
         </Stack>
       </Paper>

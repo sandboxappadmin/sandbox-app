@@ -33,7 +33,8 @@
     "dotenv": "^16.0.3",
     "reflect-metadata": "^0.2.2",
     "resend": "^6.28.1",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@repo/crypto": "*"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",

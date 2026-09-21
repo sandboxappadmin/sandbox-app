@@ -1,6 +1,9 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@repo/database';
+import { assertActiveAccount } from '@/lib/account-guard';
+import { isSuperAdmin } from '@/lib/super-admin';
+import DesktopHeader from '../desktop/DesktopHeader';
 import AccountSettingsClient from './AccountSettingsClient';
 
 export default async function AccountSettingsPage() {
@@ -9,6 +12,10 @@ export default async function AccountSettingsPage() {
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) redirect('/desktop');
+
+  await assertActiveAccount(user.accountId);
+
+  const admin = await isSuperAdmin();
 
   const domains = await prisma.sendingDomain.findMany({
     where: { accountId: user.accountId },
@@ -22,5 +29,15 @@ export default async function AccountSettingsPage() {
     records: d.records as any[],
   }));
 
-  return <AccountSettingsClient domains={serialized} />;
+  const smsCredential = await prisma.smsProviderCredential.findUnique({
+    where: { accountId: user.accountId },
+    select: { id: true },
+  });
+
+  return (
+    <>
+      <DesktopHeader isSuperAdmin={admin} showBackButton />
+      <AccountSettingsClient domains={serialized} smsConnected={Boolean(smsCredential)} />
+    </>
+  );
 }

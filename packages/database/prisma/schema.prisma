@@ -26,6 +26,7 @@ model Account {
     status AccountStatus @default(ACTIVE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+    smsProviderCredential SmsProviderCredential?
 
   users User[]
   nicheInstalls NicheInstall[]
@@ -326,4 +327,14 @@ model SendingDomain {
   accountId String
 
   @@unique([accountId, domain])
+}
+
+model SmsProviderCredential {
+  id String @id @default(cuid())
+  encryptedApiKey String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id])
+  accountId String @unique
 }

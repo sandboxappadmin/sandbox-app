@@ -3,6 +3,7 @@ import { WORKFLOW_QUEUE_NAME, workflowQueue, createWorkerConnection, type Workfl
 import { prisma } from '@repo/database';
 import { Resend } from 'resend';
 import { sendSmsGateMessage } from '@repo/sms';
+import { decryptSecret } from '@repo/crypto';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -73,31 +74,47 @@ async function processStep(step: { type: string; config: any }, contactId: strin
       break;
     }
 
-        case 'SEND_SMS': {
-      const message = step.config?.message;
-      if (!message) {
-        console.log('[workflow] SEND_SMS step has no message configured, skipping');
-        return;
-      }
+      case 'SEND_SMS': {
+  const message = step.config?.message;
+  if (!message) {
+    console.log('[workflow] SEND_SMS step has no message configured, skipping');
+    return;
+  }
 
-      const contact = await prisma.contact.findUnique({ where: { id: contactId } });
-      if (!contact?.phone) {
-        console.log(`[workflow] Contact ${contactId} has no phone number, skipping SEND_SMS step`);
-        return;
-      }
+  const contact = await prisma.contact.findUnique({
+    where: { id: contactId },
+    include: { nicheInstall: true },
+  });
+  if (!contact?.phone) {
+    console.log(`[workflow] Contact ${contactId} has no phone number, skipping SEND_SMS step`);
+    return;
+  }
 
-      const result = await sendSmsGateMessage(contact.phone, message, {
-        deviceId: step.config?.deviceId,
-        simCardId: step.config?.simCardId,
-      });
+  const credential = await prisma.smsProviderCredential.findUnique({
+    where: { accountId: contact.nicheInstall.accountId },
+  });
 
-      if (!result.ok) {
-        console.error(`[workflow] SMSGate rejected the message to ${contact.phone}:`, result.error, result.raw);
-      } else {
-        console.log(`[workflow] Sent SMS to ${contact.phone}`, result.raw);
-      }
-      break;
-    }
+  if (!credential) {
+    console.log(
+      `[workflow] Account ${contact.nicheInstall.accountId} hasn't connected SMSGate yet — skipping SEND_SMS step`
+    );
+    return;
+  }
+
+  const apiKey = decryptSecret(credential.encryptedApiKey);
+
+  const result = await sendSmsGateMessage(apiKey, contact.phone, message, {
+    deviceId: step.config?.deviceId,
+    simCardId: step.config?.simCardId,
+  });
+
+  if (!result.ok) {
+    console.error(`[workflow] SMSGate rejected the message to ${contact.phone}:`, result.error, result.raw);
+  } else {
+    console.log(`[workflow] Sent SMS to ${contact.phone}`, result.raw);
+  }
+  break;
+}
 
     default:
       console.log(`[workflow] No handler yet for step type "${step.type}"`);

@@ -12,14 +12,16 @@ function extractErrorMessage(body: unknown, status: number): string {
   return `SMSGate returned HTTP ${status}`;
 }
 
+// apiKey is now required and explicit — each account brings its own,
+// so there's no sensible global default to fall back to.
 export async function sendSmsGateMessage(
+  apiKey: string,
   to: string,
   content: string,
   options?: { deviceId?: string; simCardId?: string }
 ): Promise<SendSmsResult> {
-  const apiKey = process.env.SMSGATE_API_KEY;
   if (!apiKey) {
-    return { ok: false, error: 'SMSGATE_API_KEY is not set', raw: null };
+    return { ok: false, error: 'No SMSGate API key provided for this account', raw: null };
   }
 
   let response: Response;

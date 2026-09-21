@@ -10,6 +10,7 @@ import {
   mapResendStatus,
 } from '@repo/email';
 import { assertActiveAccount } from '@/lib/account-guard';
+import { encryptSecret } from '@repo/crypto';
 
 async function getCurrentAccountId() {
   const { userId } = await auth();
@@ -83,6 +84,32 @@ export async function removeSendingDomain(sendingDomainId: string) {
   }
 
   await prisma.sendingDomain.delete({ where: { id: record.id } });
+
+  revalidatePath('/account-settings');
+}
+
+export async function saveSmsCredential(apiKey: string) {
+  const accountId = await getCurrentAccountId();
+  const trimmed = apiKey.trim();
+  if (!trimmed) {
+    throw new Error('API key cannot be empty');
+  }
+
+  const encryptedApiKey = encryptSecret(trimmed);
+
+  await prisma.smsProviderCredential.upsert({
+    where: { accountId },
+    update: { encryptedApiKey },
+    create: { accountId, encryptedApiKey },
+  });
+
+  revalidatePath('/account-settings');
+}
+
+export async function removeSmsCredential() {
+  const accountId = await getCurrentAccountId();
+
+  await prisma.smsProviderCredential.deleteMany({ where: { accountId } });
 
   revalidatePath('/account-settings');
 }

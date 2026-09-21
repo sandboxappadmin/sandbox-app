@@ -2,6 +2,22 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.10.0] - 2026-09-21
+
+### Added
+- Per-account SMSGate credentials: each account now connects its own SMSGate API key in Account Settings, instead of the whole platform sharing one global key
+- New `@repo/crypto` package (AES-256-GCM) for encrypting API keys at rest — SmsProviderCredential stores only the encrypted value, never plaintext, and the UI never redisplays a saved key
+- SMS Provider section in Account Settings: connect, replace, or disconnect an SMSGate API key, with a clear Connected/Not Connected status
+- Workflow worker's SEND_SMS step now looks up and decrypts the contact's own account's SMSGate credential at send time; if an account hasn't connected SMSGate yet, the step is skipped with a log message rather than falling back to any shared key
+
+### Fixed
+- Account Settings page had no header or way back to the Desktop — added the shared DesktopHeader (with a back button) to this page, matching the pattern already used by the Super Admin panel
+- Account Settings page was missing the active-account enforcement check (assertActiveAccount) that other account-level pages already have
+
+### Learned
+- Established a standing checklist for new pages going forward: does it live inside an existing layout/shell with navigation, or does it need an explicit way back wired in — this gap was caught by testing, not by review
+- Prisma's "Already in sync, no schema change found" during migrate dev is a real signal the schema file itself wasn't actually edited/saved yet, not just a stale-client issue — worth checking the file directly before assuming it's the Windows EPERM problem again
+
 ## [0.9.0] - 2026-09-21
 
 ### Added
