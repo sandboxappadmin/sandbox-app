@@ -23,7 +23,8 @@
     "react-dom": "19.2.8",
     "@repo/queue": "*",
     "@repo/email": "*",
-    "@repo/crypto": "*"
+    "@repo/crypto": "*",
+    "@repo/paymongo": "*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

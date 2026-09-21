@@ -34,3 +34,20 @@ export async function revertToTrialTracking(accountId: string) {
 
   revalidatePath('/admin/accounts');
 }
+
+export async function forceTrialExpired(accountId: string) {
+  if (!(await isSuperAdmin())) {
+    throw new Error('Unauthorized');
+  }
+
+  const pastDate = new Date();
+  pastDate.setDate(pastDate.getDate() - 1);
+
+  await prisma.subscription.upsert({
+    where: { accountId },
+    update: { status: 'TRIALING', trialEndsAt: pastDate },
+    create: { accountId, status: 'TRIALING', trialEndsAt: pastDate },
+  });
+
+  revalidatePath('/admin/accounts');
+}

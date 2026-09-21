@@ -11,8 +11,9 @@ import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import { suspendAccount, reactivateAccount, softDeleteAccount } from './actions';
-import { grantFreeAccess, revertToTrialTracking } from './subscription-actions';
 import HistoryIcon from '@mui/icons-material/History';
+import { grantFreeAccess, revertToTrialTracking, forceTrialExpired } from './subscription-actions';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
 type Status = 'ACTIVE' | 'SUSPENDED' | 'DELETED';
 
@@ -76,6 +77,11 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
     const handleRevertToTrial = (row: Row) => {
     if (!window.confirm(`Revert ${row.name} to trial tracking? They'll get a fresh 14-day trial from today.`)) return;
     runAction(revertToTrialTracking, row.id);
+  };
+
+    const handleForceTrialExpired = (row: Row) => {
+    if (!window.confirm(`Force ${row.name}'s trial to expired status? Useful for testing the trial-expired flow.`)) return;
+    runAction(forceTrialExpired, row.id);
   };
 
   const columns: GridColDef<Row>[] = [
@@ -155,6 +161,18 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
               icon={<DeleteIcon fontSize="small" />}
               label="Delete"
               onClick={() => handleDelete(row)}
+              disabled={isPending}
+            />
+          );
+        }
+
+                if (row.subscriptionStatus !== 'COMP') {
+          actions.push(
+            <GridActionsCellItem
+              key="force-expired"
+              icon={<HourglassEmptyIcon fontSize="small" />}
+              label="Force Trial Expired"
+              onClick={() => handleForceTrialExpired(row)}
               disabled={isPending}
             />
           );
