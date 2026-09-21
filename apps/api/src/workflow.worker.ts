@@ -9,15 +9,18 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function processStep(step: { type: string; config: any }, contactId: string) {
   switch (step.type) {
-    case 'ADD_TAG': {
-  const tagName = step.config?.tagName;
-  if (!tagName) {
-    console.log('[workflow] ADD_TAG step has no tagName configured, skipping');
-    return;
-  }
+        case 'ADD_TAG': {
+      const tagName = step.config?.tagName;
+      if (!tagName) {
+        console.log('[workflow] ADD_TAG step has no tagName configured, skipping');
+        return;
+      }
 
       const contact = await prisma.contact.findUnique({ where: { id: contactId } });
-      if (!contact) return;
+      if (!contact) {
+        console.log(`[workflow] Contact ${contactId} not found, skipping ADD_TAG step`);
+        return;
+      }
 
       const tag = await prisma.tag.upsert({
         where: { nicheInstallId_name: { nicheInstallId: contact.nicheInstallId, name: tagName } },

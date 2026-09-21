@@ -5,7 +5,6 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -37,7 +36,13 @@ export default function DesktopHeader({
               </IconButton>
             </Tooltip>
           )}
-          <Typography variant="h6" sx={{ fontWeight: 600 }} component={Link} href="/desktop" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 600 }}
+            component={Link}
+            href="/desktop"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             Sandbox App
           </Typography>
         </Box>
@@ -50,11 +55,15 @@ export default function DesktopHeader({
               </IconButton>
             </Tooltip>
           )}
-          <IconButton aria-label="notifications">
-            <Badge badgeContent={0} color="error">
-              <NotificationsNoneIcon />
-            </Badge>
-          </IconButton>
+
+          <Tooltip title="Notifications — coming soon">
+            <span>
+              <IconButton aria-label="notifications" disabled>
+                <NotificationsNoneIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+
           <IconButton component={Link} href="/account-settings" aria-label="account settings">
             <SettingsIcon />
           </IconButton>

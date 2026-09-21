@@ -2,6 +2,12 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.10.1] - 2026-09-21
+
+### Fixed
+- Notification bell in the header no longer looks functional when it isn't — replaced the badge/count with a disabled, tooltipped placeholder ("Notifications — coming soon") until a real notification system exists
+- ADD_TAG workflow step failed silently when the contact wasn't found — now logs a clear message like the other action types already did
+
 ## [0.10.0] - 2026-09-21
 
 ### Added
