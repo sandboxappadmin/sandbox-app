@@ -5,11 +5,14 @@ import AdminTicketThreadClient from './AdminTicketThreadClient';
 export default async function AdminTicketPage({ params }: { params: Promise<{ ticketId: string }> }) {
   const { ticketId } = await params;
 
-    const tickets = await prisma.ticket.findMany({
-    orderBy: { createdAt: 'asc' },
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
     include: {
       account: { select: { name: true } },
-      _count: { select: { messages: true } },
+      messages: {
+        orderBy: { createdAt: 'asc' },
+        include: { authorUser: { select: { name: true, email: true } } },
+      },
     },
   });
 

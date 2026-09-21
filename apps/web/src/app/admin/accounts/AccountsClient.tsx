@@ -73,6 +73,11 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
     runAction(grantFreeAccess, row.id);
   };
 
+    const handleRevertToTrial = (row: Row) => {
+    if (!window.confirm(`Revert ${row.name} to trial tracking? They'll get a fresh 14-day trial from today.`)) return;
+    runAction(revertToTrialTracking, row.id);
+  };
+
   const columns: GridColDef<Row>[] = [
     { field: 'name', headerName: 'Account Name', flex: 1 },
     {
