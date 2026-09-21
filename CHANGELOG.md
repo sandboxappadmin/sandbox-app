@@ -2,6 +2,24 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.13.0] - 2026-09-21
+
+### Added
+- Subscription model with 14-day free trial: new signups get a real trial window (TRIALING status, trialEndsAt) created automatically alongside their Account via the Clerk webhook
+- Access enforcement extended (assertActiveAccount) to block access once a trial expires, redirecting to a dedicated Trial Expired page with a sign-out option
+- Super Admin: Grant Free Access (COMP status, bypasses trial/payment indefinitely) and Revert to Trial actions on any account, shown as row actions in the Accounts panel
+- Subscription status column in the Super Admin Accounts panel
+
+### Fixed
+- All pre-existing accounts backfilled to COMP status so the new trial-expiry enforcement couldn't retroactively lock out accounts that existed before this feature shipped
+- admin/tickets/[ticketId]/page.tsx was querying with findMany (listing all tickets) instead of findUnique for the single ticket being viewed — likely copy-pasted from the ticket list page and never caught since next dev doesn't run a full type-check
+- Missing handleRevertToTrial handler in AccountsClient.tsx, dropped when a full-file update overwrote an earlier incremental edit
+
+### Learned
+- Clerk's webhook now points at the production domain, so local-only testing can no longer trigger real webhook-driven account creation — any signup, local or live, hits the same deployed webhook code, meaning webhook changes must be deployed before they can be tested at all
+- Clerk explicitly does not support migrating users from a Development instance to a Production instance — existing test accounts would be stranded, not carried over, so this switch is being deliberately deferred until closer to a real paid launch alongside PayMongo
+- Gmail-style plus-addressing (email+test1@gmail.com) is a fast way to generate unlimited distinct test signups without needing new real email addresses or deleting/recreating accounts
+
 ## [0.12.0] - 2026-09-21
 
 ### Added
