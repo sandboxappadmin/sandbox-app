@@ -130,7 +130,7 @@ function CustomFieldInput({
           </Select>
         </FormControl>
       );
-    case 'DATE':
+        case 'DATE':
       return (
         <TextField
           label={def.label}
@@ -138,7 +138,7 @@ function CustomFieldInput({
           value={(value as string)?.slice(0, 10) ?? ''}
           onChange={(e) => onChange(e.target.value)}
           fullWidth
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
       );
     case 'NUMBER':
