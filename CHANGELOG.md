@@ -2,6 +2,20 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.9.0] - 2026-09-21
+
+### Added
+- Real SMS sending for SEND_SMS workflow steps via SMSGate (Android SIM-based gateway), replacing the previous stub/log-only implementation
+- New `@repo/sms` package wrapping SMSGate's HTTP API, following the same pattern as `@repo/email`
+- Workflow builder's Send SMS step now sends for real — helper text updated to reflect this instead of the old "Twilio comes later" placeholder
+
+### Known limitations
+- Messages reach SMSGate successfully and show status QUEUED in both our logs and the SMSGate dashboard, but final phone delivery is unconfirmed pending SIM card credit/load on the sending device — this is a carrier/device issue, not an application bug
+- No delivery-status webhook wired up yet — currently we only know a message was accepted by SMSGate, not whether it was actually delivered to the recipient's phone
+
+### Learned
+- Chose an Android SIM-based SMS gateway (SMSGate) over Twilio for this stage of the project — avoids per-message fees, monthly number rental, and multi-week A2P 10DLC registration, at the cost of relying on a single physical device's uptime and carrier balance
+
 ## [0.8.0] - 2026-09-20
 
 ### Added

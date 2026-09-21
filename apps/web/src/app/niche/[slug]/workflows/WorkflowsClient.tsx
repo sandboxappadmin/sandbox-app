@@ -91,7 +91,7 @@ function StepConfigFields({
       </Stack>
     );
   }
-  if (step.type === 'SEND_SMS') {
+    if (step.type === 'SEND_SMS') {
     return (
       <TextField
         label="Message"
@@ -101,7 +101,7 @@ function StepConfigFields({
         minRows={2}
         value={step.config.message ?? ''}
         onChange={(e) => onChange({ message: e.target.value })}
-        helperText="SMS sending isn't wired up yet (Twilio comes later) — this just saves the message for now."
+        helperText="Sent via SMSGate using the contact's phone number on file."
       />
     );
   }

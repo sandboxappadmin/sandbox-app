@@ -2,6 +2,7 @@ import { Worker, Job } from 'bullmq';
 import { WORKFLOW_QUEUE_NAME, workflowQueue, createWorkerConnection, type WorkflowJobData } from '@repo/queue';
 import { prisma } from '@repo/database';
 import { Resend } from 'resend';
+import { sendSmsGateMessage } from '@repo/sms';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -72,9 +73,29 @@ async function processStep(step: { type: string; config: any }, contactId: strin
       break;
     }
 
-    case 'SEND_SMS': {
-      // Twilio isn't set up yet — still a stub for now.
-      console.log(`[workflow] (stub) Would text contact ${contactId}: "${step.config?.message ?? ''}"`);
+        case 'SEND_SMS': {
+      const message = step.config?.message;
+      if (!message) {
+        console.log('[workflow] SEND_SMS step has no message configured, skipping');
+        return;
+      }
+
+      const contact = await prisma.contact.findUnique({ where: { id: contactId } });
+      if (!contact?.phone) {
+        console.log(`[workflow] Contact ${contactId} has no phone number, skipping SEND_SMS step`);
+        return;
+      }
+
+      const result = await sendSmsGateMessage(contact.phone, message, {
+        deviceId: step.config?.deviceId,
+        simCardId: step.config?.simCardId,
+      });
+
+      if (!result.ok) {
+        console.error(`[workflow] SMSGate rejected the message to ${contact.phone}:`, result.error, result.raw);
+      } else {
+        console.log(`[workflow] Sent SMS to ${contact.phone}`, result.raw);
+      }
       break;
     }
 
