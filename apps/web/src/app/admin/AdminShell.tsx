@@ -16,6 +16,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import BusinessIcon from '@mui/icons-material/Business';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { UserButton } from '@clerk/nextjs';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 
 const DRAWER_WIDTH = 240;
 
@@ -26,6 +28,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const navItems = [
     { label: 'Overview', icon: DashboardIcon, href: '/admin' },
     { label: 'Accounts', icon: BusinessIcon, href: '/admin/accounts' },
+        { label: 'Tickets', icon: ConfirmationNumberIcon, href: '/admin/tickets' },
+            { label: 'Suggestions', icon: LightbulbIcon, href: '/admin/suggestions' },
   ];
 
   return (

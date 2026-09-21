@@ -2,6 +2,20 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.12.0] - 2026-09-21
+
+### Added
+- Feedback & Suggestions board: customers can submit ideas, upvote/un-vote others' submissions, and filter by status (Open, Planned, In Progress, Shipped, Declined); visible to all logged-in customers across accounts
+- Support ticketing: customers can open tickets and reply in a threaded conversation, scoped strictly to their own account; replying to a resolved/closed ticket automatically reopens it
+- Super Admin: Suggestions panel (change status per suggestion, sorted by vote count) and Tickets panel (shared queue across all accounts, sorted oldest-first, reply as support, change ticket status)
+- Header navigation entries for Feedback and Support, alongside the existing Settings/Admin icons
+
+### Fixed
+- Admin ticket queue now orders oldest-first (first-in-first-out), rather than most-recently-updated, so support tickets get handled fairly in submission order
+
+### Learned
+- Kept feedback/suggestions and support tickets as separate models rather than merging with the earlier planned Conversation/Message design — both are "a thread tied to something," but one is public/cross-tenant (suggestions) and the other is private/per-account (tickets and future CRM conversations), which matters enough to keep them structurally distinct
+
 ## [0.11.0] - 2026-09-21
 
 ### Added

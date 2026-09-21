@@ -12,6 +12,8 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { UserButton } from '@clerk/nextjs';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 
 export default function DesktopHeader({
   isSuperAdmin = false,
@@ -55,6 +57,18 @@ export default function DesktopHeader({
               </IconButton>
             </Tooltip>
           )}
+
+                    <Tooltip title="Feedback & Suggestions">
+            <IconButton component={Link} href="/feedback" aria-label="feedback">
+              <LightbulbOutlinedIcon />
+            </IconButton>
+          </Tooltip>
+
+                    <Tooltip title="Support">
+            <IconButton component={Link} href="/support" aria-label="support">
+              <SupportAgentIcon />
+            </IconButton>
+          </Tooltip>
 
           <Tooltip title="Notifications — coming soon">
             <span>

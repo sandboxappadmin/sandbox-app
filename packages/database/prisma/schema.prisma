@@ -31,6 +31,7 @@ model Account {
   users User[]
   nicheInstalls NicheInstall[]
     sendingDomains SendingDomain[]
+      tickets Ticket[]
 }
 
 enum Role {
@@ -50,6 +51,10 @@ model User {
 
   account Account @relation(fields: [accountId], references: [id])
   accountId String
+    suggestions Suggestion[]
+  suggestionVotes SuggestionVote[]
+    tickets Ticket[]
+  ticketMessages TicketMessage[]
 }
 
 // ============================================================
@@ -337,4 +342,81 @@ model SmsProviderCredential {
 
   account Account @relation(fields: [accountId], references: [id])
   accountId String @unique
+}
+
+enum SuggestionStatus {
+  OPEN
+  PLANNED
+  IN_PROGRESS
+  SHIPPED
+  DECLINED
+}
+
+model Suggestion {
+  id String @id @default(cuid())
+  title String
+  description String
+  status SuggestionStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorUser User @relation(fields: [authorUserId], references: [id])
+  authorUserId String
+
+  votes SuggestionVote[]
+
+  @@index([authorUserId])
+}
+
+model SuggestionVote {
+  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  suggestion Suggestion @relation(fields: [suggestionId], references: [id])
+  suggestionId String
+
+  user User @relation(fields: [userId], references: [id])
+  userId String
+
+  @@unique([suggestionId, userId])
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model Ticket {
+  id String @id @default(cuid())
+  subject String
+  status TicketStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id])
+  accountId String
+
+  createdByUser User @relation(fields: [createdByUserId], references: [id])
+  createdByUserId String
+
+  messages TicketMessage[]
+
+  @@index([accountId])
+}
+
+model TicketMessage {
+  id String @id @default(cuid())
+  body String
+  isFromSupport Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+  ticketId String
+
+  authorUser User @relation(fields: [authorUserId], references: [id])
+  authorUserId String
+
+  @@index([ticketId])
 }
