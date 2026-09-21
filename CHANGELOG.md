@@ -2,6 +2,28 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.11.0] - 2026-09-21
+
+### Added
+- First production deployment: apps/web and apps/api both live on Render, using free-tier Web Services
+- Custom domains connected: app.snbxpro.com (web) and api.snbxpro.com (api), both with Render-issued SSL
+- Keep-alive cron ping (cron-job.org) keeping the API/worker service awake, since Render's free tier has no true always-on Background Worker option
+- Clerk webhook repointed from local ngrok tunnel to production domain, confirmed working end-to-end with a fresh sign-up
+- Full workflow smoke test (Add Tag, Send Email, Send SMS) confirmed passing on the live production URLs, including SMS sending from the cloud-hosted worker rather than local dev
+
+### Fixed
+- @repo/database missing postinstall hook for prisma generate, invisible locally but broke every fresh install (surfaced first on Render's clean checkout)
+- turbo.json build task missing dist/** in outputs, so apps/api's build wasn't cacheable
+- Four Prisma Json field writes failing next build's stricter type check once Prisma Client was actually being generated correctly
+- ContactsClient.tsx using a deprecated MUI TextField prop (InputLabelProps → slotProps)
+
+### Learned
+- Render's free tier has no Background Worker service type — only free Web Services (which sleep after 15 min idle) and paid Background Workers ($7+/month). A free Web Service plus an external keep-alive ping is a reasonable workaround for a staging deploy, not a substitute for a real always-on worker in production
+- Vercel's serverless execution model can't host a persistent BullMQ worker at all, regardless of tier — this ruled out ever putting apps/api there
+- A CNAME record can't coexist with other record types (TXT/MX) at the same hostname — this is why app.snbxpro.com and email.snbxpro.com needed to stay as separate, dedicated subdomains
+- Clerk Development instances work fine on any domain, not just localhost — a Production instance (which requires a domain you control with DNS access) isn't needed just to get a working staging deploy
+- next build runs a full TypeScript type-check that next dev skips entirely — several real type errors sat invisible in the codebase until the first actual production build
+
 ## [0.10.3] - 2026-09-21
 
 ### Fixed
