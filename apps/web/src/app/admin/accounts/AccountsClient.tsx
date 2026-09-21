@@ -9,7 +9,10 @@ import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import { suspendAccount, reactivateAccount, softDeleteAccount } from './actions';
+import { grantFreeAccess, revertToTrialTracking } from './subscription-actions';
+import HistoryIcon from '@mui/icons-material/History';
 
 type Status = 'ACTIVE' | 'SUSPENDED' | 'DELETED';
 
@@ -17,6 +20,8 @@ type Row = {
   id: string;
   name: string;
   status: Status;
+  subscriptionStatus: string;
+  trialEndsAt: string | null;
   ownerEmail: string;
   userCount: number;
   niches: string;
@@ -63,6 +68,11 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
     runAction(softDeleteAccount, row.id);
   };
 
+  const handleGrantFreeAccess = (row: Row) => {
+    if (!window.confirm(`Grant ${row.name} free access, bypassing trial/payment entirely?`)) return;
+    runAction(grantFreeAccess, row.id);
+  };
+
   const columns: GridColDef<Row>[] = [
     { field: 'name', headerName: 'Account Name', flex: 1 },
     {
@@ -72,6 +82,12 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
       renderCell: (params) => (
         <Chip size="small" label={params.value} color={STATUS_COLOR[params.value as Status]} />
       ),
+    },
+    {
+      field: 'subscriptionStatus',
+      headerName: 'Subscription',
+      width: 130,
+      renderCell: (params) => <Chip size="small" label={params.value} variant="outlined" />,
     },
     { field: 'ownerEmail', headerName: 'Owner Email', flex: 1.2 },
     { field: 'userCount', headerName: 'Users', width: 90 },
@@ -86,7 +102,7 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
       field: 'actions',
       type: 'actions',
       headerName: '',
-      width: 120,
+      width: 160,
       getActions: (params) => {
         const row = params.row as Row;
         const actions = [];
@@ -110,6 +126,18 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
               icon={<PlayCircleIcon fontSize="small" />}
               label="Reactivate"
               onClick={() => handleReactivate(row)}
+              disabled={isPending}
+            />
+          );
+        }
+
+                if (row.subscriptionStatus === 'COMP') {
+          actions.push(
+            <GridActionsCellItem
+              key="revert-trial"
+              icon={<HistoryIcon fontSize="small" />}
+              label="Revert to Trial"
+              onClick={() => handleRevertToTrial(row)}
               disabled={isPending}
             />
           );

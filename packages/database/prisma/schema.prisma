@@ -27,6 +27,7 @@ model Account {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
     smsProviderCredential SmsProviderCredential?
+      subscription Subscription?
 
   users User[]
   nicheInstalls NicheInstall[]
@@ -419,4 +420,24 @@ model TicketMessage {
   authorUserId String
 
   @@index([ticketId])
+}
+
+enum SubscriptionStatus {
+  TRIALING   // within the 14-day free trial window
+  ACTIVE     // real paid subscription, in good standing
+  PAST_DUE   // payment failed, grace period (not used until PayMongo work)
+  CANCELED   // subscription ended, not paying
+  COMP       // admin-granted free access — bypasses trial/payment entirely, never expires on its own
+}
+
+model Subscription {
+  id String @id @default(cuid())
+  status SubscriptionStatus @default(TRIALING)
+  trialEndsAt DateTime?
+  currentPeriodEnd DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id])
+  accountId String @unique
 }

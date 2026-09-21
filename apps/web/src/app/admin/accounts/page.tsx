@@ -7,6 +7,7 @@ export default async function AdminAccountsPage() {
     include: {
       users: true,
       nicheInstalls: true,
+      subscription: true,
     },
   });
 
@@ -14,6 +15,8 @@ export default async function AdminAccountsPage() {
     id: acc.id,
     name: acc.name,
     status: acc.status,
+    subscriptionStatus: acc.subscription?.status ?? 'NONE',
+    trialEndsAt: acc.subscription?.trialEndsAt?.toISOString() ?? null,
     ownerEmail: acc.users.find((u) => u.role === 'OWNER')?.email ?? acc.users[0]?.email ?? '—',
     userCount: acc.users.length,
     niches: acc.nicheInstalls.map((n) => n.label).join(', ') || '—',

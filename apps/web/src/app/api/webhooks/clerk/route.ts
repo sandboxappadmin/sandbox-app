@@ -41,7 +41,10 @@ export async function POST(req: Request) {
 
     const existing = await prisma.user.findUnique({ where: { clerkId } });
 
-    if (!existing) {
+        if (!existing) {
+      const trialEndsAt = new Date();
+      trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+
       await prisma.account.create({
         data: {
           name: `${first_name ?? ''}'s Workspace`.trim(),
@@ -51,6 +54,12 @@ export async function POST(req: Request) {
               email,
               name: [first_name, last_name].filter(Boolean).join(' '),
               role: 'OWNER',
+            },
+          },
+          subscription: {
+            create: {
+              status: 'TRIALING',
+              trialEndsAt,
             },
           },
         },
