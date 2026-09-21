@@ -9,6 +9,7 @@ import {
   deleteResendDomain,
   mapResendStatus,
 } from '@repo/email';
+import { assertActiveAccount } from '@/lib/account-guard';
 
 async function getCurrentAccountId() {
   const { userId } = await auth();
@@ -16,6 +17,8 @@ async function getCurrentAccountId() {
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) throw new Error('No account found for this user');
+
+  await assertActiveAccount(user.accountId);
 
   return user.accountId;
 }

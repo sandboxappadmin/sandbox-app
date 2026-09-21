@@ -3,9 +3,8 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import { prisma } from '@repo/database';
 import { getNicheBySlug } from './niches';
+import { assertActiveAccount } from './account-guard';
 
-// cache() dedupes this so the layout and the page for the same
-// request don't each hit the database separately for the same data.
 export const getCurrentNicheInstall = cache(async (slug: string) => {
   const { userId } = await auth();
   if (!userId) redirect('/');
@@ -15,6 +14,8 @@ export const getCurrentNicheInstall = cache(async (slug: string) => {
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) redirect('/');
+
+  await assertActiveAccount(user.accountId);
 
   const install = await prisma.nicheInstall.findFirst({
     where: { accountId: user.accountId, niche: niche.type },

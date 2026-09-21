@@ -13,6 +13,7 @@ export default async function AdminAccountsPage() {
   const rows = accounts.map((acc) => ({
     id: acc.id,
     name: acc.name,
+    status: acc.status,
     ownerEmail: acc.users.find((u) => u.role === 'OWNER')?.email ?? acc.users[0]?.email ?? '—',
     userCount: acc.users.length,
     niches: acc.nicheInstalls.map((n) => n.label).join(', ') || '—',

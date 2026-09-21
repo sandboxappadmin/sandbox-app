@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@repo/database';
 import { getNicheBySlug } from '@/lib/niches';
+import { assertActiveAccount } from '@/lib/account-guard';
 
 export async function openNiche(slug: string) {
     const { userId } = await auth();
@@ -21,12 +22,12 @@ export async function openNiche(slug: string) {
         throw new Error('No database user found for this Clerk account yet.');
     }
 
-    // Check if this account already installed this niche
+    await assertActiveAccount(user.accountId);
+
     let install = await prisma.nicheInstall.findFirst({
         where: { accountId: user.accountId, niche: niche.type },
     });
 
-    // First time opening this niche - create the isolated workspace
     if (!install) {
         install = await prisma.nicheInstall.create({
             data: {

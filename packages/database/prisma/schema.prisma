@@ -14,9 +14,16 @@ datasource db {
 // ACCOUNT & USERS — the tenant boundary for login/billing/team
 // ============================================================
 
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
 model Account {
   id String @id @default(cuid())
   name String
+    status AccountStatus @default(ACTIVE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
