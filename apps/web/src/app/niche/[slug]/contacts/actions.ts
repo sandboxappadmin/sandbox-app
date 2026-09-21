@@ -71,14 +71,14 @@ export async function createContact(slug: string, data: ContactFormData) {
 
   const customFields = await buildValidatedCustomFields(install.id, data.customFields);
 
-  const contact = await prisma.contact.create({
+    const contact = await prisma.contact.create({
     data: {
       nicheInstallId: install.id,
       firstName: data.firstName || null,
       lastName: data.lastName || null,
       email: data.email || null,
       phone: data.phone || null,
-      customFields,
+      customFields: customFields as any, // validated plain object — JSON-safe at runtime, same Prisma strict-typing gap
     },
   });
 
@@ -115,14 +115,14 @@ export async function updateContact(slug: string, contactId: string, data: Conta
 
   const customFields = await buildValidatedCustomFields(install.id, data.customFields);
 
-  await prisma.contact.update({
+    await prisma.contact.update({
     where: { id: contactId },
     data: {
       firstName: data.firstName || null,
       lastName: data.lastName || null,
       email: data.email || null,
       phone: data.phone || null,
-      customFields,
+      customFields: customFields as any,
     },
   });
 

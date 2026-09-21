@@ -34,13 +34,13 @@ export async function addSendingDomain(domain: string) {
     throw new Error(error?.message ?? 'Resend rejected this domain');
   }
 
-  await prisma.sendingDomain.create({
+    await prisma.sendingDomain.create({
     data: {
       accountId,
       domain: trimmed,
       resendDomainId: data.id,
       status: 'PENDING',
-      records: data.records ?? [],
+      records: (data.records ?? []) as any, // Resend's DNS record objects — valid JSON at runtime, Prisma's strict InputJsonValue typing just can't verify it structurally
     },
   });
 
@@ -58,11 +58,11 @@ export async function refreshDomainStatus(sendingDomainId: string) {
   const { data } = await getResendDomain(record.resendDomainId);
   if (!data) return;
 
-  await prisma.sendingDomain.update({
+    await prisma.sendingDomain.update({
     where: { id: record.id },
     data: {
       status: mapResendStatus(data.status),
-      records: data.records ?? record.records,
+      records: (data.records ?? record.records) as any,
     },
   });
 

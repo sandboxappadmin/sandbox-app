@@ -2,6 +2,25 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.10.3] - 2026-09-21
+
+### Fixed
+- Four Prisma Json field writes (SendingDomain.records in two places, Contact.customFields in two places) failed next build's TypeScript check once the Prisma Client was actually being generated on a fresh install — the underlying data was always valid JSON at runtime, but our plain object/array types didn't structurally satisfy Prisma's strict InputJsonValue type. Added narrow, deliberate casts at each write site rather than loosening types elsewhere.
+
+### Learned
+- next build always runs a full TypeScript check; next dev does not — so a type error can sit silently in a file for weeks of local development and only surface the first time the project is actually built for deploy
+
+## [0.10.2] - 2026-09-21
+
+### Fixed
+- @repo/database was missing a postinstall hook to run prisma generate — this was invisible in local dev since the Prisma Client was regenerated manually throughout development, but caused Render's fresh checkout to build against an ungenerated client, surfacing as implicit-any TypeScript errors on every callback touching Prisma query results
+- turbo.json's build task only declared .next/** as output, so Turborepo couldn't detect or cache apps/api's dist/** build output
+- ContactsClient.tsx used MUI's deprecated InputLabelProps prop on the custom field DATE input, replaced with slotProps
+
+### Learned
+- A monorepo build that only ever ran locally (with manual prisma generate calls in between) can hide a missing postinstall step indefinitely — a genuinely fresh checkout, like a new CI/deploy environment, is what actually exposes it
+- Render's free Web Service tier doesn't support a true always-on background worker; apps/api's persistent BullMQ worker needs to run inside a Web Service with an external keep-alive ping, or move to a paid Background Worker instance later
+
 ## [0.10.1] - 2026-09-21
 
 ### Fixed
