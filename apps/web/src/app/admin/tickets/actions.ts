@@ -22,11 +22,24 @@ export async function addSupportReply(ticketId: string, body: string) {
   const trimmed = body.trim();
   if (!trimmed) return;
 
+  const ticket = await prisma.ticket.update({
+    where: { id: ticketId },
+    data: { status: 'IN_PROGRESS' },
+  });
+
   await prisma.ticketMessage.create({
     data: { ticketId, body: trimmed, authorUserId: user.id, isFromSupport: true },
   });
 
-  await prisma.ticket.update({ where: { id: ticketId }, data: { status: 'IN_PROGRESS' } });
+  await prisma.notification.create({
+    data: {
+      userId: ticket.createdByUserId,
+      type: 'TICKET_REPLY',
+      title: `New reply: ${ticket.subject}`,
+      body: trimmed.length > 100 ? `${trimmed.slice(0, 100)}…` : trimmed,
+      linkUrl: `/support/${ticketId}`,
+    },
+  });
 
   revalidatePath(`/admin/tickets/${ticketId}`);
   revalidatePath('/admin/tickets');

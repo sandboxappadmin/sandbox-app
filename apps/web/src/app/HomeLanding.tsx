@@ -446,10 +446,10 @@ export default function HomeLanding() {
         </Typography>
       </Box>
 
-      {/* Footer */}
+            {/* Footer */}
       <Box sx={{ borderTop: '1px solid rgba(20,24,31,0.1)', py: 4 }}>
         <Box
-                    sx={{
+          sx={{
             maxWidth: 1160,
             mx: 'auto',
             px: { xs: 3, md: 5 },
@@ -461,15 +461,25 @@ export default function HomeLanding() {
           <Typography className={body.className} variant="body2" sx={{ color: SLATE }}>
             Sandbox App
           </Typography>
-          <SignInButton mode="modal">
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Button
+              href="/updates"
               variant="text"
               size="small"
               sx={{ color: SLATE, fontFamily: body.style.fontFamily }}
             >
-              Log in
+              What's New
             </Button>
-          </SignInButton>
+            <SignInButton mode="modal">
+              <Button
+                variant="text"
+                size="small"
+                sx={{ color: SLATE, fontFamily: body.style.fontFamily }}
+              >
+                Log in
+              </Button>
+            </SignInButton>
+          </Stack>
         </Box>
       </Box>
     </Box>

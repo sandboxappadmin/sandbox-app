@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
+import RenewalCheckButton from './RenewalCheckButton';
 
 export default async function AdminOverviewPage() {
   const [accountCount, userCount, nicheInstallCount, contactCount, workflowCount] =
@@ -32,6 +33,8 @@ export default async function AdminOverviewPage() {
       <Typography variant="h4" sx={{ fontWeight: 600, mb: 3 }}>
         Platform Overview
       </Typography>
+
+            <RenewalCheckButton />
 
       <Grid container spacing={2} sx={{ mb: 4 }}>
         {stats.map((stat) => (

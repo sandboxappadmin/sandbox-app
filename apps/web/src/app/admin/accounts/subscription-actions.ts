@@ -3,6 +3,15 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@repo/database';
 import { isSuperAdmin } from '@/lib/super-admin';
+import { workflowQueue } from '@repo/queue';
+
+export async function triggerRenewalCheckNow() {
+  if (!(await isSuperAdmin())) {
+    throw new Error('Unauthorized');
+  }
+
+  await workflowQueue.add('check-renewals', {});
+}
 
 export async function grantFreeAccess(accountId: string) {
   if (!(await isSuperAdmin())) {

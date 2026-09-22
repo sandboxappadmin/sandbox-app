@@ -24,6 +24,7 @@ import {
   saveSmsCredential,
   removeSmsCredential,
 } from './actions';
+import { startCheckout } from '../billing/actions';
 
 type DnsRecord = { record: string; name: string; type: string; value: string; ttl: string };
 type Domain = { id: string; domain: string; status: string; records: DnsRecord[] };
@@ -34,12 +35,20 @@ const STATUS_COLOR: Record<string, 'default' | 'success' | 'warning' | 'error'> 
   FAILED: 'error',
 };
 
+type Subscription = {
+  status: string;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+} | null;
+
 export default function AccountSettingsClient({
   domains,
   smsConnected,
+  subscription,
 }: {
   domains: Domain[];
   smsConnected: boolean;
+  subscription: Subscription;
 }) {
   const [newDomain, setNewDomain] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +104,48 @@ export default function AccountSettingsClient({
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         Settings here apply across your whole account, not just one workspace.
       </Typography>
+
+            {subscription && (
+        <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+            Subscription
+          </Typography>
+
+          {subscription.status === 'TRIALING' && subscription.trialEndsAt && (
+            <>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Your free trial ends on{' '}
+                {new Date(subscription.trialEndsAt).toLocaleDateString()}.
+              </Typography>
+              <form action={startCheckout}>
+                <Button type="submit" variant="contained">
+                  Subscribe Now
+                </Button>
+              </form>
+            </>
+          )}
+
+          {subscription.status === 'ACTIVE' && subscription.currentPeriodEnd && (
+            <>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Your subscription renews on{' '}
+                {new Date(subscription.currentPeriodEnd).toLocaleDateString()}.
+              </Typography>
+              <form action={startCheckout}>
+                <Button type="submit" variant="outlined">
+                  Renew Early
+                </Button>
+              </form>
+            </>
+          )}
+
+          {subscription.status === 'COMP' && (
+            <Typography variant="body2" color="text.secondary">
+              You have complimentary access — no billing applies to this account.
+            </Typography>
+          )}
+        </Paper>
+      )}
 
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>

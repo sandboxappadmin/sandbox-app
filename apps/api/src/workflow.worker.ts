@@ -124,10 +124,57 @@ async function processStep(step: { type: string; config: any }, contactId: strin
   }
 }
 
+async function checkRenewals() {
+  const now = new Date();
+  const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+  const dueSoon = await prisma.subscription.findMany({
+    where: {
+      renewalReminderSentAt: null,
+      OR: [
+        { status: 'TRIALING', trialEndsAt: { gte: now, lte: threeDaysFromNow } },
+        { status: 'ACTIVE', currentPeriodEnd: { gte: now, lte: threeDaysFromNow } },
+      ],
+    },
+    include: { account: { include: { users: true } } },
+  });
+
+  for (const sub of dueSoon) {
+    const owner = sub.account.users.find((u) => u.role === 'OWNER') ?? sub.account.users[0];
+    if (!owner) continue;
+
+    const endDate = sub.status === 'TRIALING' ? sub.trialEndsAt : sub.currentPeriodEnd;
+    const label = sub.status === 'TRIALING' ? 'trial' : 'subscription';
+
+    await prisma.notification.create({
+      data: {
+        userId: owner.id,
+        type: 'SUBSCRIPTION_RENEWAL_DUE',
+        title: `Your ${label} ends soon`,
+        body: `Your ${label} ends on ${endDate?.toLocaleDateString()}. Renew to avoid losing access.`,
+        linkUrl: '/trial-expired',
+      },
+    });
+
+    await prisma.subscription.update({
+      where: { id: sub.id },
+      data: { renewalReminderSentAt: now },
+    });
+
+    console.log(`[renewal-check] Notified account ${sub.accountId} (${label} ending ${endDate?.toISOString()})`);
+  }
+
+  console.log(`[renewal-check] Checked, ${dueSoon.length} notification(s) sent`);
+}
+
 export function startWorkflowWorker() {
   const worker = new Worker<WorkflowJobData>(
     WORKFLOW_QUEUE_NAME,
     async (job: Job<WorkflowJobData>) => {
+      if (job.name === 'check-renewals') {
+        return checkRenewals();
+      }
+
       const { workflowId, contactId } = job.data;
 
       const workflow = await prisma.workflow.findUnique({
@@ -165,6 +212,15 @@ export function startWorkflowWorker() {
       }
     },
         { connection: createWorkerConnection() }
+  );
+
+    workflowQueue.add(
+    'check-renewals',
+    {},
+    {
+      repeat: { pattern: '0 9 * * *' }, // daily at 9am server time
+      jobId: 'daily-renewal-check', // stable id — re-registering on every restart won't duplicate it
+    }
   );
 
   worker.on('completed', (job) => console.log(`[workflow] Job ${job.id} completed`));

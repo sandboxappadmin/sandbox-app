@@ -42,6 +42,23 @@ export async function createTicket(subject: string, message: string) {
     },
   });
 
+  const adminEmails = (process.env.SUPER_ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  const admins = await prisma.user.findMany({ where: { email: { in: adminEmails } } });
+
+  await prisma.notification.createMany({
+    data: admins.map((admin) => ({
+      userId: admin.id,
+      type: 'TICKET_REPLY' as const,
+      title: `New ticket: ${trimmedSubject}`,
+      body: trimmedMessage.length > 100 ? `${trimmedMessage.slice(0, 100)}…` : trimmedMessage,
+      linkUrl: `/admin/tickets/${ticket.id}`,
+    })),
+  });
+
   revalidatePath('/support');
   redirect(`/support/${ticket.id}`);
 }
@@ -60,10 +77,26 @@ export async function addCustomerReply(ticketId: string, body: string) {
     data: { ticketId, body: trimmed, authorUserId: user.id, isFromSupport: false },
   });
 
-  // A customer replying to a resolved/closed ticket reopens it automatically
   if (ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') {
     await prisma.ticket.update({ where: { id: ticketId }, data: { status: 'OPEN' } });
   }
+
+  const adminEmails = (process.env.SUPER_ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  const admins = await prisma.user.findMany({ where: { email: { in: adminEmails } } });
+
+  await prisma.notification.createMany({
+    data: admins.map((admin) => ({
+      userId: admin.id,
+      type: 'TICKET_REPLY' as const,
+      title: `New reply: ${ticket.subject}`,
+      body: trimmed.length > 100 ? `${trimmed.slice(0, 100)}…` : trimmed,
+      linkUrl: `/admin/tickets/${ticketId}`,
+    })),
+  });
 
   revalidatePath(`/support/${ticketId}`);
 }

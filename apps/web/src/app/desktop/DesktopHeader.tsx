@@ -8,12 +8,14 @@ import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { UserButton } from '@clerk/nextjs';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import NewReleasesIcon from '@mui/icons-material/NewReleases';
+import NotificationBell from './NotificationBell';
+import RenewalBanner from './RenewalBanner';
 
 export default function DesktopHeader({
   isSuperAdmin = false,
@@ -23,6 +25,7 @@ export default function DesktopHeader({
   showBackButton?: boolean;
 }) {
   return (
+    <>
     <AppBar
       position="static"
       color="default"
@@ -58,6 +61,12 @@ export default function DesktopHeader({
             </Tooltip>
           )}
 
+                    <Tooltip title="What's New">
+            <IconButton component={Link} href="/updates" aria-label="updates">
+              <NewReleasesIcon />
+            </IconButton>
+          </Tooltip>
+
                     <Tooltip title="Feedback & Suggestions">
             <IconButton component={Link} href="/feedback" aria-label="feedback">
               <LightbulbOutlinedIcon />
@@ -70,13 +79,7 @@ export default function DesktopHeader({
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Notifications — coming soon">
-            <span>
-              <IconButton aria-label="notifications" disabled>
-                <NotificationsNoneIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
+                    <NotificationBell />
 
           <IconButton component={Link} href="/account-settings" aria-label="account settings">
             <SettingsIcon />
@@ -85,5 +88,7 @@ export default function DesktopHeader({
         </Box>
       </Toolbar>
     </AppBar>
+    <RenewalBanner />
+    </>
   );
 }

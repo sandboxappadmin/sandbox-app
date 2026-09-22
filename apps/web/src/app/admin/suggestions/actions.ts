@@ -12,7 +12,28 @@ export async function updateSuggestionStatus(
     throw new Error('Unauthorized');
   }
 
-  await prisma.suggestion.update({ where: { id: suggestionId }, data: { status } });
+  const suggestion = await prisma.suggestion.update({
+    where: { id: suggestionId },
+    data: { status },
+  });
+
+  const STATUS_LABELS: Record<string, string> = {
+    OPEN: 'Open',
+    PLANNED: 'Planned',
+    IN_PROGRESS: 'In Progress',
+    SHIPPED: 'Shipped',
+    DECLINED: 'Declined',
+  };
+
+  await prisma.notification.create({
+    data: {
+      userId: suggestion.authorUserId,
+      type: 'SUGGESTION_STATUS_CHANGED',
+      title: `"${suggestion.title}" is now ${STATUS_LABELS[status]}`,
+      body: 'Tap to see your suggestion.',
+      linkUrl: '/feedback',
+    },
+  });
 
   revalidatePath('/admin/suggestions');
   revalidatePath('/feedback');

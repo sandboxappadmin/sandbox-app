@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@repo/database';
 import { verifyPaymongoSignature } from '@repo/paymongo';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(req: Request) {
   const signatureHeader = req.headers.get('paymongo-signature') ?? req.headers.get('x-paymongo-signature');
@@ -40,14 +41,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, warning: 'account not found' });
     }
 
-    const currentPeriodEnd = new Date();
+        const existingSubscription = await prisma.subscription.findUnique({
+      where: { accountId: account.id },
+    });
+
+    // If they're already ACTIVE with time remaining, stack 30 fresh days
+    // onto whatever's left rather than discarding it. Trialing (or lapsed/
+    // no existing period) always starts the real 30 days from right now —
+    // paying early during a trial converts immediately, it doesn't wait
+    // out the rest of the free period.
+    const hasRemainingPaidTime =
+      existingSubscription?.status === 'ACTIVE' &&
+      existingSubscription.currentPeriodEnd &&
+      existingSubscription.currentPeriodEnd > new Date();
+
+    const baseDate = hasRemainingPaidTime ? existingSubscription!.currentPeriodEnd! : new Date();
+    const currentPeriodEnd = new Date(baseDate);
     currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 30);
 
     await prisma.subscription.upsert({
       where: { accountId: account.id },
-      update: { status: 'ACTIVE', currentPeriodEnd },
-      create: { accountId: account.id, status: 'ACTIVE', currentPeriodEnd },
+      update: { status: 'ACTIVE', currentPeriodEnd, renewalReminderSentAt: null },
+      create: { accountId: account.id, status: 'ACTIVE', currentPeriodEnd, renewalReminderSentAt: null },
     });
+
+    console.log(
+      `[paymongo webhook] ${hasRemainingPaidTime ? 'Renewed' : 'Activated'} subscription for account ${account.id}, new period ends ${currentPeriodEnd.toISOString()}`
+    );
+
+        revalidatePath('/admin/accounts');
+    revalidatePath('/account-settings');
 
     console.log(`[paymongo webhook] Activated subscription for account ${account.id}`);
   }

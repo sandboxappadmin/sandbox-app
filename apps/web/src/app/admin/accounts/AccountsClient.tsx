@@ -9,12 +9,19 @@ import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import { suspendAccount, reactivateAccount, softDeleteAccount } from './actions';
 import HistoryIcon from '@mui/icons-material/History';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { grantFreeAccess, revertToTrialTracking, forceTrialExpired, forceSubscriptionExpired } from './subscription-actions';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import EditCalendarIcon from '@mui/icons-material/EditCalendar';
+import { setRenewalDate } from './date-actions';
+import Button from '@mui/material/Button';
 
 type Status = 'ACTIVE' | 'SUSPENDED' | 'DELETED';
 
@@ -24,6 +31,7 @@ type Row = {
   status: Status;
   subscriptionStatus: string;
   trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
   ownerEmail: string;
   userCount: number;
   niches: string;
@@ -39,6 +47,8 @@ const STATUS_COLOR: Record<Status, 'success' | 'warning' | 'error'> = {
 export default function AccountsClient({ rows }: { rows: Row[] }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [editingRow, setEditingRow] = useState<Row | null>(null);
+  const [editDate, setEditDate] = useState('');
 
   const runAction = (fn: (id: string) => Promise<void>, id: string) => {
     setError(null);
@@ -90,6 +100,18 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
     runAction(forceSubscriptionExpired, row.id);
   };
 
+  const openDateEditor = (row: Row) => {
+    const current = row.subscriptionStatus === 'TRIALING' ? row.trialEndsAt : row.currentPeriodEnd;
+    setEditDate(current ? current.slice(0, 10) : '');
+    setEditingRow(row);
+  };
+
+  const handleSaveDate = () => {
+    if (!editingRow || !editDate) return;
+    runAction((id) => setRenewalDate(id, editDate), editingRow.id);
+    setEditingRow(null);
+  };
+
   const columns: GridColDef<Row>[] = [
     { field: 'name', headerName: 'Account Name', flex: 1 },
     {
@@ -105,6 +127,15 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
       headerName: 'Subscription',
       width: 130,
       renderCell: (params) => <Chip size="small" label={params.value} variant="outlined" />,
+    },
+        {
+      field: 'renewalDate',
+      headerName: 'Renews / Ends',
+      width: 150,
+      valueGetter: (_value, row: Row) => {
+        const date = row.subscriptionStatus === 'TRIALING' ? row.trialEndsAt : row.currentPeriodEnd;
+        return date ? new Date(date).toLocaleDateString() : '—';
+      },
     },
     { field: 'ownerEmail', headerName: 'Owner Email', flex: 1.2 },
     { field: 'userCount', headerName: 'Users', width: 90 },
@@ -123,6 +154,18 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
       getActions: (params) => {
         const row = params.row as Row;
         const actions = [];
+
+                if (row.subscriptionStatus === 'TRIALING' || row.subscriptionStatus === 'ACTIVE') {
+          actions.push(
+            <GridActionsCellItem
+              key="edit-date"
+              icon={<EditCalendarIcon fontSize="small" />}
+              label="Edit Renewal Date"
+              onClick={() => openDateEditor(row)}
+              disabled={isPending}
+            />
+          );
+        }
 
         if (row.status === 'ACTIVE') {
           actions.push(
@@ -224,6 +267,27 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
           initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
         />
       </Box>
+
+            <Dialog open={Boolean(editingRow)} onClose={() => setEditingRow(null)}>
+        <DialogTitle>Edit Renewal Date — {editingRow?.name}</DialogTitle>
+        <DialogContent>
+          <TextField
+            type="date"
+            value={editDate}
+            onChange={(e) => setEditDate(e.target.value)}
+            fullWidth
+            sx={{ mt: 1 }}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditingRow(null)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveDate} disabled={isPending}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 }

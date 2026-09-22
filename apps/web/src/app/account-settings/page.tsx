@@ -34,10 +34,27 @@ export default async function AccountSettingsPage() {
     select: { id: true },
   });
 
-  return (
+    const subscription = await prisma.subscription.findUnique({
+    where: { accountId: user.accountId },
+    select: { status: true, trialEndsAt: true, currentPeriodEnd: true },
+  });
+
+    return (
     <>
       <DesktopHeader isSuperAdmin={admin} showBackButton />
-      <AccountSettingsClient domains={serialized} smsConnected={Boolean(smsCredential)} />
+      <AccountSettingsClient
+        domains={serialized}
+        smsConnected={Boolean(smsCredential)}
+        subscription={
+          subscription
+            ? {
+                status: subscription.status,
+                trialEndsAt: subscription.trialEndsAt?.toISOString() ?? null,
+                currentPeriodEnd: subscription.currentPeriodEnd?.toISOString() ?? null,
+              }
+            : null
+        }
+      />
     </>
   );
 }
