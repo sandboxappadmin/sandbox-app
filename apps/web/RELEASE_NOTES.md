@@ -5,8 +5,6 @@
 - Added a friendly reminder banner that shows up shortly before your trial or subscription ends
 - You can now see your renewal date and subscribe or renew directly from Account Settings
 - Renewing early now correctly adds a full 30 days to whatever time you had left, instead of restarting the clock
-
-## September 22, 2026
 - Redesigned homepage with a live look at how Sandbox App adapts to your industry
 - You can now subscribe using GCash, Maya, GrabPay, QRPh, or ShopeePay
 - Improved reliability of subscription renewals
