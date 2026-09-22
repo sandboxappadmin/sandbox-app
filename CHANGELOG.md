@@ -2,6 +2,27 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.14.0] - 2026-09-22
+
+### Added
+- PayMongo Checkout Session integration for subscription payments — ₱299/month flat plan, supporting GCash, GrabPay, Maya, QRPh, and ShopeePay
+- New @repo/paymongo package: creates checkout sessions, verifies webhook signatures (handles both of PayMongo's documented signature formats defensively)
+- Webhook handler (checkout_session.payment.paid) activates a Subscription (status ACTIVE, 30-day currentPeriodEnd) by matching reference_number back to the paying account
+- Trial Expired page now has a real "Subscribe Now" button instead of a placeholder
+- Billing success/cancel pages
+- Super Admin: Force Trial Expired action, for testing the expired-trial flow without waiting 14 real days
+
+### Fixed
+- PayMongo webhook route was created inside apps/api (a plain NestJS worker with no Next.js routing) instead of apps/web, and missing the src/app/ prefix entirely — meant the endpoint returned a 404 the whole time, which silently explained every failed webhook delivery attempt
+- billing/success and billing/cancel pages failed to build (Server Component passing a component reference to a Client Component) — fixed by marking both 'use client'
+- Corrected ShopeePay's payment_method_types identifier from a guessed shopeepay to the actual shopee_pay, confirmed directly via PayMongo's own "retrieve merchant payment methods" endpoint rather than continued guessing
+
+### Learned
+- PayMongo e-wallet methods (GCash, Maya, GrabPay) don't support automatic recurring billing the way cards do — subscription renewal here means generating a fresh checkout session when payment is due, not an auto-charge
+- PayMongo's Test mode and Live mode are two entirely separate configurations sharing one dashboard — a webhook registered in Live mode will never receive Test mode events, and vice versa, mirroring the same lesson learned earlier with Clerk's Development vs Production instances
+- git log --all -- <path> returning nothing is a definitive way to confirm a file was never actually committed, cutting through confusion when a file visibly exists in the editor but isn't reaching a deployed environment
+- When guessing at a third-party API's enum/identifier strings is unavoidable, build in a way to verify directly against the provider's own API (as done here via PayMongo's merchant capabilities endpoint) rather than relying on scattered examples alone
+
 ## [0.13.0] - 2026-09-21
 
 ### Added
