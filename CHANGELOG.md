@@ -2,6 +2,26 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.16.0] - 2026-09-22
+
+### Added
+- Real notification system: in-app notifications for ticket replies (both directions — support replying to customer, customer replying back to support), suggestion status changes, and upcoming trial/subscription renewals
+- Notification bell now shows a live unread count and a dropdown of recent notifications, replacing the earlier disabled placeholder
+- Daily scheduled renewal check (via a BullMQ repeatable job in apps/api) that notifies account owners within 3 days of their trial or subscription ending
+- Super Admin: manual "Run Renewal Check Now" trigger and an "Edit Renewal Date" action per account, for testing without waiting on real time to pass
+- Account Settings now shows the account's actual trial end date or renewal date, with a Subscribe/Renew button
+- Dismissible renewal countdown banner shown across the app within 7 days of trial/subscription end, linking to Account Settings
+
+### Fixed
+- Early renewal (paying again while still within an active paid period) now correctly stacks a fresh 30 days onto whatever time remained, instead of discarding it and starting a new 30-day period from the payment date
+- Converting from trial to paid correctly starts the real 30-day period from the moment of payment, rather than being affected by trial-stacking logic
+- PayMongo webhook now calls revalidatePath after updating a subscription, so the Super Admin panel and Account Settings reflect the change immediately instead of showing stale cached data
+- New ticket / new ticket reply from a customer now correctly notifies all Super Admins — this direction was missing entirely in the first pass, so admins had no way to know a new ticket existed except by manually checking the queue
+
+### Learned
+- A webhook whose code was edited but never committed/pushed produces a very convincing "it's not working" symptom — the log output itself (an old log message format still appearing) was the clearest signal that new code wasn't actually deployed, more reliable than inferring from behavior alone
+- Adding 30 days is not the same as adding one calendar month — crossing a 31-day month will land one day "short" of the naive expectation; this is the mathematically correct, consistent behavior for a flat 30-day billing period and was kept as-is rather than switched to calendar-month arithmetic
+
 ## [0.15.0] - 2026-09-22
 
 ### Added
