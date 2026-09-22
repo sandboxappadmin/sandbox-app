@@ -5,7 +5,14 @@ import { SignOutButton } from '@clerk/nextjs';
 import { startCheckout } from '../billing/actions';
 import { PLAN_PRICE_PHP } from '@repo/paymongo';
 
-export default function TrialExpiredPage() {
+export default async function TrialExpiredPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reason?: string }>;
+}) {
+  const { reason } = await searchParams;
+  const isRenewal = reason === 'renewal';
+
   return (
     <Box
       sx={{
@@ -21,16 +28,18 @@ export default function TrialExpiredPage() {
     >
       <Box>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
-          Your Free Trial Has Ended
+          {isRenewal ? 'Your Subscription Period Has Ended' : 'Your Free Trial Has Ended'}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Subscribe for ₱{PLAN_PRICE_PHP}/month to keep using your workspace.
+          {isRenewal
+            ? `Renew for ₱${PLAN_PRICE_PHP}/month to keep using your workspace.`
+            : `Subscribe for ₱${PLAN_PRICE_PHP}/month to keep using your workspace.`}
         </Typography>
       </Box>
 
       <form action={startCheckout}>
         <Button type="submit" variant="contained" size="large">
-          Subscribe Now
+          {isRenewal ? 'Renew Now' : 'Subscribe Now'}
         </Button>
       </form>
 

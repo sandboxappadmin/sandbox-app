@@ -51,3 +51,20 @@ export async function forceTrialExpired(accountId: string) {
 
   revalidatePath('/admin/accounts');
 }
+
+export async function forceSubscriptionExpired(accountId: string) {
+  if (!(await isSuperAdmin())) {
+    throw new Error('Unauthorized');
+  }
+
+  const pastDate = new Date();
+  pastDate.setDate(pastDate.getDate() - 1);
+
+  await prisma.subscription.upsert({
+    where: { accountId },
+    update: { status: 'ACTIVE', currentPeriodEnd: pastDate },
+    create: { accountId, status: 'ACTIVE', currentPeriodEnd: pastDate },
+  });
+
+  revalidatePath('/admin/accounts');
+}

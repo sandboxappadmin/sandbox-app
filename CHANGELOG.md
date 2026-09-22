@@ -2,6 +2,19 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.15.0] - 2026-09-22
+
+### Added
+- New home page / marketing landing page, replacing the plain placeholder — includes a live interactive demo of niche-specific pipeline stages, pricing, and how-it-works sections
+- Super Admin: Force Subscription Expired action, for testing the renewal flow on an ACTIVE account without waiting a real 30-day period
+
+### Fixed
+- Critical billing bug: assertActiveAccount granted unconditional access to any ACTIVE subscription, never checking whether currentPeriodEnd had actually passed — since PayMongo's e-wallet methods don't auto-renew, this meant any customer who paid once would have kept permanent free access indefinitely. Now correctly redirects to a renewal prompt once the paid period lapses.
+- trial-expired page now shows accurate copy ("Renew Now" / period-ended messaging) when reached via a lapsed subscription, rather than always showing trial-specific language
+
+### Learned
+- An enforcement check that handles every status except the "happy path" status is easy to miss in review — ACTIVE looked like the safe, done case, but was actually the one path with no real check behind it at all
+
 ## [0.14.0] - 2026-09-22
 
 ### Added

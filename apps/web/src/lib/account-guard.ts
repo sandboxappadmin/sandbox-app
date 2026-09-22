@@ -6,7 +6,7 @@ export async function assertActiveAccount(accountId: string) {
     where: { id: accountId },
     select: {
       status: true,
-      subscription: { select: { status: true, trialEndsAt: true } },
+      subscription: { select: { status: true, trialEndsAt: true, currentPeriodEnd: true } },
     },
   });
 
@@ -20,15 +20,22 @@ export async function assertActiveAccount(accountId: string) {
     redirect('/trial-expired');
   }
 
-  if (sub.status === 'COMP' || sub.status === 'ACTIVE') {
-    return;
+  if (sub.status === 'COMP') {
+    return; // unrestricted, always — no period to check
+  }
+
+  if (sub.status === 'ACTIVE') {
+    if (sub.currentPeriodEnd && sub.currentPeriodEnd > new Date()) {
+      return; // paid, and still within the period that payment covered
+    }
+    redirect('/trial-expired?reason=renewal');
   }
 
   if (sub.status === 'TRIALING') {
     if (sub.trialEndsAt && sub.trialEndsAt > new Date()) {
       return;
     }
-    redirect('/trial-expired');
+    redirect('/trial-expired?reason=trial');
   }
 
   redirect('/trial-expired');
