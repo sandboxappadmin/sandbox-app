@@ -2,6 +2,15 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.17.1] - 2026-09-22
+
+### Fixed
+- Local development now uses a separate, isolated Neon database instead of sharing the production database — local testing, migrations, and debugging scripts can no longer accidentally affect real customer data
+- Production's database connection is unchanged; only local .env files were updated
+
+### Learned
+- Since the Clerk webhook is registered against the production domain, new signups always create Account/User rows in production regardless of which database a local dev server points to — local test accounts now need to be seeded manually (or via a second Clerk webhook pointed at a local tunnel) rather than created through normal signup
+
 ## [0.17.0] - 2026-09-22
 
 ### Added
