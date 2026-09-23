@@ -14,6 +14,7 @@ type CreateCheckoutSessionResult =
 // this value back rather than us needing to store a separate mapping.
 export async function createCheckoutSession(
   referenceNumber: string,
+  customerEmail: string,
   successUrl: string,
   cancelUrl: string
 ): Promise<CreateCheckoutSessionResult> {
@@ -37,7 +38,7 @@ export async function createCheckoutSession(
         Authorization: authHeader,
         'Content-Type': 'application/json',
       },
-            body: JSON.stringify({
+             body: JSON.stringify({
         data: {
           attributes: {
             line_items: [
@@ -53,9 +54,12 @@ export async function createCheckoutSession(
             cancel_url: cancelUrl,
             reference_number: referenceNumber,
             send_email_receipt: true,
+            billing: {
+              email: customerEmail,
+            },
           },
         },
-      }),
+      }),     
     });
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Network error', raw: null };

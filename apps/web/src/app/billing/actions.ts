@@ -14,8 +14,9 @@ export async function startCheckout() {
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.snbxpro.com';
 
-  const result = await createCheckoutSession(
+    const result = await createCheckoutSession(
     user.accountId,
+    user.email,
     `${baseUrl}/billing/success`,
     `${baseUrl}/billing/cancel`
   );
