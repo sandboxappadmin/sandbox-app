@@ -2,6 +2,20 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.18.0] - 2026-09-23
+
+### Added
+- Terms of Service and Privacy Policy pages, referencing the Philippines' Data Privacy Act of 2012, linked from the homepage footer
+- Payment receipts now sent for every successful subscription payment, via our own Resend domain — works reliably regardless of payment method
+
+### Fixed
+- PayMongo's built-in send_email_receipt only worked for payment methods that capture a billing email during their own flow (GCash, Maya) — QRPh's static code-scan flow never attaches a billing email to the underlying payment record, so no receipt could ever be sent that way. Replaced with our own receipt email sent directly from the webhook, using the account owner's known email, which works identically across all payment methods
+- Local development now uses a separate, isolated Neon database instead of sharing the production database
+
+### Learned
+- PayMongo's checkout-session-level billing.email and the underlying Payment record's own billing snapshot are two different things — setting one doesn't guarantee the other is populated, and this varies by payment method in ways not fully documented
+- Since Clerk and PayMongo webhooks are only reachable at the production URL, testing billing/payment flows can no longer be done on localhost now that dev and production databases are separated — these changes require a real deploy to test
+
 ## [0.17.1] - 2026-09-22
 
 ### Fixed

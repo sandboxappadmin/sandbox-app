@@ -1,6 +1,6 @@
 {
   "name": "sandbox-app",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
