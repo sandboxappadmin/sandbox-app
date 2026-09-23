@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@repo/database';
 import { verifyPaymongoSignature } from '@repo/paymongo';
 import { revalidatePath } from 'next/cache';
+import { PLAN_PRICE_PHP } from '@repo/paymongo';
 
 export async function POST(req: Request) {
   const signatureHeader = req.headers.get('paymongo-signature') ?? req.headers.get('x-paymongo-signature');
@@ -25,6 +26,18 @@ export async function POST(req: Request) {
   console.log('[paymongo webhook] Received event:', eventType, JSON.stringify(event));
 
   if (eventType === 'checkout_session.payment.paid' || eventType === 'payment.paid') {
+
+        const owner = await prisma.user.findFirst({ where: { accountId: account.id, role: 'OWNER' } });
+    if (owner?.email) {
+      const { sendEmail } = await import('@repo/email');
+      await sendEmail({
+        from: 'Sandbox App <hello@email.snbxpro.com>',
+        to: owner.email,
+        subject: 'Payment Receipt — Sandbox App',
+        text: `Hi,\n\nThis confirms your payment of ₱${PLAN_PRICE_PHP} for Sandbox App.\n\nYour subscription is now active${currentPeriodEnd ? ` through ${currentPeriodEnd.toLocaleDateString()}` : ''}.\n\nThanks for using Sandbox App.`,
+      });
+    }
+
     const referenceNumber =
       event?.data?.attributes?.data?.attributes?.reference_number ??
       event?.data?.attributes?.data?.attributes?.external_reference_number ??
