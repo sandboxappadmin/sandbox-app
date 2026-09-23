@@ -21,23 +21,9 @@ export async function POST(req: Request) {
   const event = JSON.parse(rawBody);
   const eventType = event?.data?.attributes?.type;
 
-  // Log the full raw event on first real receipt — we need this to confirm
-  // our assumptions about payload shape and where reference_number lives.
   console.log('[paymongo webhook] Received event:', eventType, JSON.stringify(event));
 
   if (eventType === 'checkout_session.payment.paid' || eventType === 'payment.paid') {
-
-        const owner = await prisma.user.findFirst({ where: { accountId: account.id, role: 'OWNER' } });
-    if (owner?.email) {
-      const { sendEmail } = await import('@repo/email');
-      await sendEmail({
-        from: 'Sandbox App <hello@email.snbxpro.com>',
-        to: owner.email,
-        subject: 'Payment Receipt — Sandbox App',
-        text: `Hi,\n\nThis confirms your payment of ₱${PLAN_PRICE_PHP} for Sandbox App.\n\nYour subscription is now active${currentPeriodEnd ? ` through ${currentPeriodEnd.toLocaleDateString()}` : ''}.\n\nThanks for using Sandbox App.`,
-      });
-    }
-
     const referenceNumber =
       event?.data?.attributes?.data?.attributes?.reference_number ??
       event?.data?.attributes?.data?.attributes?.external_reference_number ??
@@ -54,7 +40,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, warning: 'account not found' });
     }
 
-        const existingSubscription = await prisma.subscription.findUnique({
+    const existingSubscription = await prisma.subscription.findUnique({
       where: { accountId: account.id },
     });
 
@@ -82,8 +68,19 @@ export async function POST(req: Request) {
       `[paymongo webhook] ${hasRemainingPaidTime ? 'Renewed' : 'Activated'} subscription for account ${account.id}, new period ends ${currentPeriodEnd.toISOString()}`
     );
 
-        revalidatePath('/admin/accounts');
+    revalidatePath('/admin/accounts');
     revalidatePath('/account-settings');
+
+    const owner = await prisma.user.findFirst({ where: { accountId: account.id, role: 'OWNER' } });
+    if (owner?.email) {
+      const { sendEmail } = await import('@repo/email');
+      await sendEmail({
+        from: 'Sandbox App <hello@email.snbxpro.com>',
+        to: owner.email,
+        subject: 'Payment Receipt — Sandbox App',
+        text: `Hi,\n\nThis confirms your payment of ₱${PLAN_PRICE_PHP} for Sandbox App.\n\nYour subscription is now active${currentPeriodEnd ? ` through ${currentPeriodEnd.toLocaleDateString()}` : ''}.\n\nThanks for using Sandbox App.`,
+      });
+    }
 
     console.log(`[paymongo webhook] Activated subscription for account ${account.id}`);
   }
