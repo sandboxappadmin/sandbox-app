@@ -461,21 +461,18 @@ export default function HomeLanding() {
           <Typography className={body.className} variant="body2" sx={{ color: SLATE }}>
             Sandbox App
           </Typography>
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <Button
-              href="/updates"
-              variant="text"
-              size="small"
-              sx={{ color: SLATE, fontFamily: body.style.fontFamily }}
-            >
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Button href="/terms" variant="text" size="small" sx={{ color: SLATE, fontFamily: body.style.fontFamily }}>
+              Terms
+            </Button>
+            <Button href="/privacy" variant="text" size="small" sx={{ color: SLATE, fontFamily: body.style.fontFamily }}>
+              Privacy
+            </Button>
+            <Button href="/updates" variant="text" size="small" sx={{ color: SLATE, fontFamily: body.style.fontFamily }}>
               What's New
             </Button>
             <SignInButton mode="modal">
-              <Button
-                variant="text"
-                size="small"
-                sx={{ color: SLATE, fontFamily: body.style.fontFamily }}
-              >
+              <Button variant="text" size="small" sx={{ color: SLATE, fontFamily: body.style.fontFamily }}>
                 Log in
               </Button>
             </SignInButton>

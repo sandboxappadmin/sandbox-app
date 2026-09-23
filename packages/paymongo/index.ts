@@ -37,7 +37,7 @@ export async function createCheckoutSession(
         Authorization: authHeader,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
+            body: JSON.stringify({
         data: {
           attributes: {
             line_items: [
@@ -52,6 +52,7 @@ export async function createCheckoutSession(
             success_url: successUrl,
             cancel_url: cancelUrl,
             reference_number: referenceNumber,
+            send_email_receipt: true,
           },
         },
       }),
