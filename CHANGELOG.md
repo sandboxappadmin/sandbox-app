@@ -2,6 +2,15 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.19.0] - 2026-09-23
+
+### Added
+- Error monitoring via Sentry, covering apps/web (browser, server, and edge runtime errors), with source map uploads wired into the deploy process for readable production stack traces
+
+### Learned
+- Sentry's free Developer plan requires no credit card at signup — new accounts get a 14-day trial of paid features automatically, then quietly settle onto the permanent free tier (5,000 errors/month) with no action needed and no risk of surprise billing
+- Chose to skip routing browser error reports through the Next.js server (avoiding ad-blocker interference) in favor of sending directly to Sentry, to avoid adding load to a free-tier hosting plan — an acceptable tradeoff at current scale
+
 ## [0.18.0] - 2026-09-23
 
 ### Added
