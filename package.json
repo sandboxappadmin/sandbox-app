@@ -24,6 +24,7 @@
   ],
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@sentry/nextjs": "^10.75.2",
     "svix": "^2.5.0"
   },
   "allowScripts": {
