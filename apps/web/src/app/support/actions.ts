@@ -27,6 +27,14 @@ export async function createTicket(subject: string, message: string) {
     throw new Error('Subject and message are required');
   }
 
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentCount = await prisma.ticket.count({
+    where: { createdByUserId: user.id, createdAt: { gte: oneDayAgo } },
+  });
+  if (recentCount >= 5) {
+    throw new Error('You have reached the daily limit for new tickets (5/day). Please add to an existing ticket instead, or try again tomorrow.');
+  }
+
   const ticket = await prisma.ticket.create({
     data: {
       subject: trimmedSubject,
@@ -71,6 +79,14 @@ export async function addCustomerReply(ticketId: string, body: string) {
   const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
   if (!ticket || ticket.accountId !== user.accountId) {
     throw new Error('Ticket not found');
+  }
+
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const recentCount = await prisma.ticketMessage.count({
+    where: { authorUserId: user.id, isFromSupport: false, createdAt: { gte: oneHourAgo } },
+  });
+  if (recentCount >= 20) {
+    throw new Error('You are sending messages too quickly. Please wait a bit before sending more.');
   }
 
   await prisma.ticketMessage.create({

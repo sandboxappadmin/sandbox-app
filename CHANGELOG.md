@@ -2,6 +2,14 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.19.1] - 2026-09-23
+
+### Added
+- Basic rate limiting on user-generated content: 5 new suggestions/day, 5 new tickets/day, 20 ticket replies/hour per user — implemented via simple timestamp-based database counts, no new infrastructure needed
+
+### Learned
+- PayMongo refunds cannot be tested in Test mode at all — only live transactions are eligible for refund via their API or dashboard. Refund tooling is deliberately deferred until going live with real PayMongo Live mode + Clerk Production, since it can't be verified working any earlier than that
+
 ## [0.19.0] - 2026-09-23
 
 ### Added

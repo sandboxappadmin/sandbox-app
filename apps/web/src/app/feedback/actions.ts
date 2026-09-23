@@ -26,6 +26,14 @@ export async function createSuggestion(title: string, description: string) {
     throw new Error('Title is required');
   }
 
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentCount = await prisma.suggestion.count({
+    where: { authorUserId: user.id, createdAt: { gte: oneDayAgo } },
+  });
+  if (recentCount >= 5) {
+    throw new Error('You have reached the daily limit for suggestions (5/day). Please try again tomorrow.');
+  }
+
   await prisma.suggestion.create({
     data: {
       title: trimmedTitle,
