@@ -69,8 +69,8 @@ export default async function UpdatesPage() {
         </Typography>
 
         <Stack spacing={5}>
-          {entries.map((entry) => (
-            <Box key={entry.date}>
+          {entries.map((entry, index) => (
+            <Box key={`${entry.date}-${index}`}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
                 {entry.date}
               </Typography>

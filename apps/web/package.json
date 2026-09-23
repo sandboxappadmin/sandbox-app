@@ -24,7 +24,8 @@
     "@repo/queue": "*",
     "@repo/email": "*",
     "@repo/crypto": "*",
-    "@repo/paymongo": "*"
+    "@repo/paymongo": "*",
+    "@repo/sms": "*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -2,6 +2,23 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.17.0] - 2026-09-22
+
+### Added
+- Unified Contact timeline: a single chronological view of every Email and SMS sent to a contact, reachable via a new "Messages" action on the Contacts list
+- Manual one-off Email and SMS sending directly from a contact's timeline, in addition to automated workflow sends
+- Workflow-triggered emails and SMS now log into this same timeline automatically, so automated and manual outreach show up together in one place
+- New sendEmail function in @repo/email, giving the web app a proper shared path to Resend instead of duplicating raw SDK calls
+
+### Fixed
+- Redesigned the original Conversation/Message schema, which had never been implemented (planned only) and was missing a body field entirely, plus grouped conversations by channel instead of by contact
+- ContactsClient.tsx had a useRouter() hook call sitting outside any component function (module-level), causing an "Invalid hook call" error — moved inside the actual component body
+
+### Learned
+- SMSGate has no webhook and no message-status lookup endpoint at all — delivery confirmation isn't achievable with this provider as it stands, closed out honestly rather than building something that doesn't actually verify anything
+- Building an in-house Android SMS gateway is viable via sideloaded APK distribution (same model SMSGate itself uses) but would require becoming the phone's default SMS handler to ever publish on the Play Store — scoped and deliberately deferred as a future dedicated project
+- A stale Prisma Client can survive even a targeted .prisma cache clear in some cases; removing node_modules/@prisma/client entirely (not just node_modules/.prisma) is the more reliable full reset when a
+
 ## [0.16.0] - 2026-09-22
 
 ### Added

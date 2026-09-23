@@ -1,6 +1,6 @@
 {
   "name": "sandbox-app",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -23,6 +23,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@prisma/client": "^6.19.0",
     "svix": "^2.5.0"
   },
   "allowScripts": {

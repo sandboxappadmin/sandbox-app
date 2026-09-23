@@ -141,10 +141,10 @@ model Contact {
 
   nicheInstall   NicheInstall @relation(fields: [nicheInstallId], references: [id])
   nicheInstallId String
+  conversation Conversation?
 
   tags          Tag[]
   opportunities Opportunity[]
-  conversations Conversation[]
 
   @@index([nicheInstallId])
 }
@@ -288,28 +288,35 @@ enum MessageDirection {
 }
 
 model Conversation {
-  id        String         @id @default(cuid())
-  channel   MessageChannel
-  createdAt DateTime       @default(now())
+  id String @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  nicheInstall   NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
   nicheInstallId String
 
-  contact   Contact @relation(fields: [contactId], references: [id])
-  contactId String
+  contact Contact @relation(fields: [contactId], references: [id])
+  contactId String @unique
 
   messages Message[]
 
   @@index([nicheInstallId])
-  @@index([contactId])
+}
+
+enum MessageStatus {
+  SENT
+  FAILED
 }
 
 model Message {
-  id        String           @id @default(cuid())
+  id String @id @default(cuid())
+  channel MessageChannel
   direction MessageDirection
-  createdAt DateTime         @default(now())
+  subject String?
+  body String
+  status MessageStatus @default(SENT)
+  createdAt DateTime @default(now())
 
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id])
   conversationId String
 
   @@index([conversationId])

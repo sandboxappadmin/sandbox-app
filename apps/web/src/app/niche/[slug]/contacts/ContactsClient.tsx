@@ -32,6 +32,8 @@ import {
   addTagToContact,
   removeTagFromContact,
 } from './actions';
+import { useRouter } from 'next/navigation';
+import ChatIcon from '@mui/icons-material/Chat';
 
 type Tag = { id: string; name: string };
 
@@ -252,6 +254,7 @@ export default function ContactsClient({
   allTags: Tag[];
   customFieldDefs: CustomFieldDef[];
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -341,6 +344,12 @@ export default function ContactsClient({
           icon={<DeleteIcon fontSize="small" />}
           label="Delete"
           onClick={() => handleDelete(params.row)}
+        />,
+                <GridActionsCellItem
+          key="timeline"
+          icon={<ChatIcon fontSize="small" />}
+          label="Messages"
+          onClick={() => router.push(`/niche/${slug}/contacts/${params.row.id}`)}
         />,
       ],
     },

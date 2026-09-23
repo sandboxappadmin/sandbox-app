@@ -6,16 +6,10 @@ export async function createResendDomain(domain: string) {
   return resend.domains.create({ name: domain });
 }
 
-// Read-only status check — no side effects. Use this for a plain refresh.
 export async function getResendDomain(resendDomainId: string) {
   return resend.domains.get(resendDomainId);
 }
 
-// Explicitly asks Resend to re-run DNS verification now, rather than
-// waiting for Resend's own background check. This resets status to
-// "pending" until the new check completes, so only call this when the
-// user deliberately wants to force a re-check (e.g. right after fixing
-// DNS records) — never on a routine status refresh.
 export async function forceReverifyResendDomain(resendDomainId: string) {
   return resend.domains.verify(resendDomainId);
 }
@@ -27,5 +21,24 @@ export async function deleteResendDomain(resendDomainId: string) {
 export function mapResendStatus(status: string | undefined): 'PENDING' | 'VERIFIED' | 'FAILED' {
   if (status === 'verified') return 'VERIFIED';
   if (status === 'failed' || status === 'temporary_failure') return 'FAILED';
-  return 'PENDING'; // covers 'pending' and 'not_started'
+  return 'PENDING';
+}
+
+type SendEmailResult = { ok: true; id: string } | { ok: false; error: string };
+
+export async function sendEmail(params: {
+  from: string;
+  to: string;
+  subject: string;
+  text: string;
+}): Promise<SendEmailResult> {
+  try {
+    const { data, error } = await resend.emails.send(params);
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+    return { ok: true, id: data?.id ?? '' };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Unknown error' };
+  }
 }

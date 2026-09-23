@@ -71,9 +71,27 @@ async function processStep(step: { type: string; config: any }, contactId: strin
         } else {
           console.log(`[workflow] Sent email to ${contact.email} from ${fromAddress}, id: ${data?.id}`);
         }
+
+                const conversation = await prisma.conversation.upsert({
+          where: { contactId },
+          update: {},
+          create: { contactId, nicheInstallId: contact.nicheInstallId },
+        });
+        await prisma.message.create({
+          data: {
+            conversationId: conversation.id,
+            channel: 'EMAIL',
+            direction: 'OUTBOUND',
+            subject: step.config?.subject || 'A message from your workspace',
+            body: message,
+            status: error ? 'FAILED' : 'SENT',
+          },
+        });
+
       } catch (err) {
         console.error('[workflow] Failed to send email:', err);
       }
+      
       break;
     }
 
@@ -110,6 +128,21 @@ async function processStep(step: { type: string; config: any }, contactId: strin
     deviceId: step.config?.deviceId,
     simCardId: step.config?.simCardId,
   });
+
+        const conversation = await prisma.conversation.upsert({
+        where: { contactId },
+        update: {},
+        create: { contactId, nicheInstallId: contact.nicheInstall.accountId ? contact.nicheInstallId : contact.nicheInstallId },
+      });
+      await prisma.message.create({
+        data: {
+          conversationId: conversation.id,
+          channel: 'SMS',
+          direction: 'OUTBOUND',
+          body: message,
+          status: result.ok ? 'SENT' : 'FAILED',
+        },
+      });
 
   if (!result.ok) {
     console.error(`[workflow] SMSGate rejected the message to ${contact.phone}:`, result.error, result.raw);

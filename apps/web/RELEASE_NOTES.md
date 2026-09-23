@@ -1,6 +1,8 @@
 # Updates
 
 ## September 22, 2026
+- You can now see your full message history with each contact — every email and text, automated or sent manually — all in one place
+- Send a one-off email or text to any contact directly from their timeline
 - You'll now get notified in the app when support replies to your ticket, when your suggestion's status changes, and when your trial or subscription is about to end
 - Added a friendly reminder banner that shows up shortly before your trial or subscription ends
 - You can now see your renewal date and subscribe or renew directly from Account Settings
