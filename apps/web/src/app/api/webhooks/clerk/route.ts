@@ -22,8 +22,6 @@ export async function POST(req: Request) {
   const wh = new Webhook(webhookSecret);
 
   try {
-    // Newer svix versions only verify the signature — they no longer
-    // parse and return the JSON payload, so we parse `body` ourselves below.
     wh.verify(body, {
       'svix-id': svixId,
       'svix-timestamp': svixTimestamp,
@@ -35,20 +33,18 @@ export async function POST(req: Request) {
 
   const evt = JSON.parse(body);
 
-    if (evt.type === 'user.created') {
+  if (evt.type === 'user.created') {
     const { id: clerkId, email_addresses, first_name, last_name } = evt.data;
     const email = email_addresses?.[0]?.email_address ?? '';
 
     const existing = await prisma.user.findUnique({ where: { clerkId } });
 
-        if (!existing) {
+    if (!existing) {
       const pendingInvitation = await prisma.invitation.findFirst({
         where: { email: email.toLowerCase(), status: 'PENDING', expiresAt: { gt: new Date() } },
       });
 
       if (pendingInvitation) {
-        // Join the existing account this invite belongs to, instead of
-        // creating a brand new one — this is what makes team invites work.
         await prisma.user.create({
           data: {
             clerkId,
@@ -88,6 +84,7 @@ export async function POST(req: Request) {
         });
       }
     }
+  }
 
   return NextResponse.json({ received: true });
 }
