@@ -15,6 +15,10 @@ export default async function AccountSettingsPage() {
 
   await assertActiveAccount(user.accountId);
 
+    if (user.role !== 'OWNER' && user.role !== 'ADMIN') {
+    redirect('/desktop');
+  }
+
   const admin = await isSuperAdmin();
 
   const domains = await prisma.sendingDomain.findMany({
@@ -41,7 +45,7 @@ export default async function AccountSettingsPage() {
 
     return (
     <>
-            <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user.role === 'OWNER'} />
+              return <DesktopGrid isSuperAdmin={admin} isOwner={user?.role === 'OWNER'} canManageAccount={user?.role === 'OWNER' || user?.role === 'ADMIN'} />;
       <AccountSettingsClient
         domains={serialized}
         smsConnected={Boolean(smsCredential)}

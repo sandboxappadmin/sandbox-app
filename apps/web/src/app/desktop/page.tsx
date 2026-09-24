@@ -19,5 +19,5 @@ export default async function DesktopPage() {
 
   const admin = await isSuperAdmin();
 
-  return <DesktopGrid isSuperAdmin={admin} isOwner={user?.role === 'OWNER'} />;
+    return <DesktopGrid isSuperAdmin={admin} isOwner={user?.role === 'OWNER'} canManageAccount={user?.role === 'OWNER' || user?.role === 'ADMIN'} />;
 }

@@ -22,10 +22,12 @@ export default function DesktopHeader({
   isSuperAdmin = false,
   showBackButton = false,
   isOwner = false,
+  canManageAccount = false,
 }: {
   isSuperAdmin?: boolean;
   showBackButton?: boolean;
   isOwner?: boolean;
+  canManageAccount?: boolean;
 }) {
   return (
     <>
@@ -92,9 +94,11 @@ export default function DesktopHeader({
 
                     <NotificationBell />
 
-          <IconButton component={Link} href="/account-settings" aria-label="account settings">
-            <SettingsIcon />
-          </IconButton>
+                    {canManageAccount && (
+            <IconButton component={Link} href="/account-settings" aria-label="account settings">
+              <SettingsIcon />
+            </IconButton>
+          )}
           <UserButton />
         </Box>
       </Toolbar>

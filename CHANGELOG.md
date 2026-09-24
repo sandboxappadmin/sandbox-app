@@ -2,6 +2,22 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.20.0] - 2026-09-24
+
+### Added
+- Team invitations: account owners can invite teammates by email with a role (Admin or Agent), sent via email with a signed, expiring invite link
+- Role-based access control: Owner (full access, including billing), Admin (account settings, not billing), Agent (CRM data only) — enforced both on server actions and by hiding inaccessible UI (Team, Account Settings icons) for lower-privileged roles
+- Clerk webhook now checks for a pending invitation before creating a new account, so an invited teammate joins the existing workspace instead of getting their own separate one
+
+### Fixed
+- Discovered that local and production databases can drift out of sync after tonight's dev/prod database split — a migration run locally never reaches production automatically. Applied the missing add_invitations migration to production manually via a scoped, temporary env override
+- Invite page now detects when someone is already signed into an existing Clerk session and shows a clear explanation instead of a confusing "no database user found" error
+
+### Learned
+- Render's Pre-Deploy Command (which would automate running migrations before each deploy) requires a paid Starter plan — free tier requires manually running prisma migrate deploy against production after every schema change until upgrading
+- A brace mismatch introduced while editing a function with nested conditionals can silently produce "Return statement is not allowed here" or "Expected '}', got '<eof>'" — worth pasting the full file back for review rather than patching blind when these appear
+- Clerk only fires user.created for genuinely new identities — an email that already has any Clerk account (even from unrelated earlier testing) will just log in silently instead of triggering account-creation logic, which can look identical to a webhook failure until checked directly
+
 ## [0.19.1] - 2026-09-23
 
 ### Added

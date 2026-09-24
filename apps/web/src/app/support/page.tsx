@@ -34,7 +34,7 @@ export default async function SupportPage() {
 
   return (
     <>
-            <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user.role === 'OWNER'} />
+              return <DesktopGrid isSuperAdmin={admin} isOwner={user?.role === 'OWNER'} canManageAccount={user?.role === 'OWNER' || user?.role === 'ADMIN'} />;
       <SupportClient tickets={serialized} />
     </>
   );

@@ -49,7 +49,7 @@ export default async function TicketPage({ params }: { params: Promise<{ ticketI
 
   return (
     <>
-            <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user.role === 'OWNER'} />
+              return <DesktopGrid isSuperAdmin={admin} isOwner={user?.role === 'OWNER'} canManageAccount={user?.role === 'OWNER' || user?.role === 'ADMIN'} />;
       <TicketThreadClient ticket={serialized} />
     </>
   );

@@ -60,7 +60,7 @@ export default async function UpdatesPage() {
 
   return (
     <>
-            {userId ? <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user?.role === 'OWNER'} /> : <PublicNav />}
+            {userId ? <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user?.role === 'OWNER'} canManageAccount={user?.role === 'OWNER' || user?.role === 'ADMIN'}/> : <PublicNav />}
 
       <Box sx={{ maxWidth: 640, mx: 'auto', px: { xs: 3, md: 0 }, py: { xs: 6, md: 8 } }}>
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
