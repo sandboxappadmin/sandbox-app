@@ -33,6 +33,7 @@ model Account {
   nicheInstalls  NicheInstall[]
   sendingDomains SendingDomain[]
   tickets        Ticket[]
+    invitations Invitation[]
 }
 
 enum Role {
@@ -57,6 +58,7 @@ model User {
   tickets         Ticket[]
   ticketMessages  TicketMessage[]
   notifications   Notification[]
+    invitationsSent Invitation[]
 }
 
 // ============================================================
@@ -471,4 +473,30 @@ model Notification {
   userId String
 
   @@index([userId])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+model Invitation {
+  id String @id @default(cuid())
+  email String
+  role Role
+  status InvitationStatus @default(PENDING)
+  token String @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  account Account @relation(fields: [accountId], references: [id])
+  accountId String
+
+  invitedByUser User @relation(fields: [invitedByUserId], references: [id])
+  invitedByUserId String
+
+  @@unique([accountId, email])
+  @@index([accountId])
 }

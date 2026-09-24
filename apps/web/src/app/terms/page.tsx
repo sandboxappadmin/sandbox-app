@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { SignInButton } from '@clerk/nextjs';
 import { isSuperAdmin } from '@/lib/super-admin';
 import DesktopHeader from '../desktop/DesktopHeader';
+import { prisma } from '@repo/database';
 
 function PublicNav() {
   return (
@@ -32,12 +33,13 @@ function PublicNav() {
 }
 
 export default async function TermsPage() {
-  const { userId } = await auth();
+    const { userId } = await auth();
   const admin = userId ? await isSuperAdmin() : false;
+  const user = userId ? await prisma.user.findUnique({ where: { clerkId: userId } }) : null;
 
   return (
     <>
-      {userId ? <DesktopHeader isSuperAdmin={admin} showBackButton /> : <PublicNav />}
+            {userId ? <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user?.role === 'OWNER'} /> : <PublicNav />}
 
       <Box sx={{ maxWidth: 720, mx: 'auto', px: { xs: 3, md: 0 }, py: { xs: 6, md: 8 } }}>
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>

@@ -41,7 +41,7 @@ export default async function AccountSettingsPage() {
 
     return (
     <>
-      <DesktopHeader isSuperAdmin={admin} showBackButton />
+            <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user.role === 'OWNER'} />
       <AccountSettingsClient
         domains={serialized}
         smsConnected={Boolean(smsCredential)}

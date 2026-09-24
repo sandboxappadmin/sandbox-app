@@ -1,20 +1,16 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@repo/database';
 import { createCheckoutSession } from '@repo/paymongo';
+import { assertOwner } from '@/lib/roles';
 
 export async function startCheckout() {
-  const { userId } = await auth();
-  if (!userId) redirect('/');
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) redirect('/desktop');
+  const user = await assertOwner();
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.snbxpro.com';
 
-    const result = await createCheckoutSession(
+  const result = await createCheckoutSession(
     user.accountId,
     user.email,
     `${baseUrl}/billing/success`,

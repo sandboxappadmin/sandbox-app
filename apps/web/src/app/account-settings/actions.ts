@@ -11,16 +11,10 @@ import {
 } from '@repo/email';
 import { assertActiveAccount } from '@/lib/account-guard';
 import { encryptSecret } from '@repo/crypto';
+import { assertAdminOrOwner } from '@/lib/roles';
 
 async function getCurrentAccountId() {
-  const { userId } = await auth();
-  if (!userId) throw new Error('Not authenticated');
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) throw new Error('No account found for this user');
-
-  await assertActiveAccount(user.accountId);
-
+  const user = await assertAdminOrOwner();
   return user.accountId;
 }
 

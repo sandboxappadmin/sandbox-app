@@ -39,7 +39,7 @@ export default async function FeedbackPage() {
 
   return (
     <>
-      <DesktopHeader isSuperAdmin={admin} showBackButton />
+            <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user.role === 'OWNER'} />
       <FeedbackClient initialSuggestions={serialized} />
     </>
   );

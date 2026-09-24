@@ -16,13 +16,16 @@ import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import NotificationBell from './NotificationBell';
 import RenewalBanner from './RenewalBanner';
+import GroupIcon from '@mui/icons-material/Group';
 
 export default function DesktopHeader({
   isSuperAdmin = false,
   showBackButton = false,
+  isOwner = false,
 }: {
   isSuperAdmin?: boolean;
   showBackButton?: boolean;
+  isOwner?: boolean;
 }) {
   return (
     <>
@@ -78,6 +81,14 @@ export default function DesktopHeader({
               <SupportAgentIcon />
             </IconButton>
           </Tooltip>
+
+                    {isOwner && (
+            <Tooltip title="Team">
+              <IconButton component={Link} href="/team" aria-label="team">
+                <GroupIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
                     <NotificationBell />
 

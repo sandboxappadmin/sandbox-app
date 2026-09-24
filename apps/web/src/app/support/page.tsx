@@ -34,7 +34,7 @@ export default async function SupportPage() {
 
   return (
     <>
-      <DesktopHeader isSuperAdmin={admin} showBackButton />
+            <DesktopHeader isSuperAdmin={admin} showBackButton isOwner={user.role === 'OWNER'} />
       <SupportClient tickets={serialized} />
     </>
   );
