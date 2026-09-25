@@ -25,6 +25,7 @@ import {
   removeSmsCredential,
 } from './actions';
 import { startCheckout } from '../billing/actions';
+import { exportAccountData, requestAccountDeletion } from './data-actions';
 
 type DnsRecord = { record: string; name: string; type: string; value: string; ttl: string };
 type Domain = { id: string; domain: string; status: string; records: DnsRecord[] };
@@ -57,6 +58,34 @@ export default function AccountSettingsClient({
   const [smsApiKey, setSmsApiKey] = useState('');
   const [smsError, setSmsError] = useState<string | null>(null);
   const [isSmsPending, startSmsTransition] = useTransition();
+
+    const [isExporting, setIsExporting] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleteRequested, setDeleteRequested] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const json = await exportAccountData();
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sandbox-app-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleRequestDeletion = () => {
+    if (!window.confirm('This will notify our team to permanently delete all your account data. This cannot be undone once processed. Continue?')) return;
+    startTransition(async () => {
+      await requestAccountDeletion(deleteReason);
+      setDeleteRequested(true);
+    });
+  };
 
   const handleAdd = () => {
     setError(null);
@@ -146,6 +175,43 @@ export default function AccountSettingsClient({
           )}
         </Paper>
       )}
+
+            <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+          Your Data
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Download a complete copy of your account's data, or request permanent deletion.
+        </Typography>
+
+        <Button variant="outlined" onClick={handleExport} disabled={isExporting} sx={{ mb: 3 }}>
+          {isExporting ? 'Preparing export...' : 'Download My Data'}
+        </Button>
+
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+          Request Account Deletion
+        </Typography>
+        {deleteRequested ? (
+          <Alert severity="success">
+            Your request has been received. Our team will process it and follow up by email.
+          </Alert>
+        ) : (
+          <Stack spacing={1.5}>
+            <TextField
+              size="small"
+              placeholder="Reason (optional)"
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+              fullWidth
+              multiline
+              minRows={2}
+            />
+            <Button color="error" variant="outlined" onClick={handleRequestDeletion} sx={{ alignSelf: 'flex-start' }}>
+              Request Deletion
+            </Button>
+          </Stack>
+        )}
+      </Paper>
 
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>

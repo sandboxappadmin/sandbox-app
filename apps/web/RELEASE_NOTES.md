@@ -1,5 +1,13 @@
 # Updates
 
+## September 24, 2026
+- You can now download a complete copy of your account's data anytime from Account Settings
+- Added a way to request permanent account deletion, per your data privacy rights
+
+## September 23, 2026
+- Added Terms of Service and Privacy Policy pages
+- You'll now reliably receive a payment receipt by email after every successful subscription payment, no matter which payment method you use
+
 ## September 22, 2026
 - You can now see your full message history with each contact — every email and text, automated or sent manually — all in one place
 - Send a one-off email or text to any contact directly from their timeline

@@ -2,6 +2,15 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.21.0] - 2026-09-24
+
+### Added
+- Data export: account owners and admins can download a complete JSON export of their account's data (contacts, pipelines, workflows, tickets, messages) directly from Account Settings
+- Data deletion requests: submitting a request creates a ticket routed to the existing support queue, with a notification sent to all admins — closes the gap between what the Privacy Policy promises and what tooling actually exists
+
+### Learned
+- Reused the existing ticket + notification system for deletion requests rather than building a separate admin surface, since it's a rare action that doesn't need its own dedicated queue
+
 ## [0.20.0] - 2026-09-24
 
 ### Added
