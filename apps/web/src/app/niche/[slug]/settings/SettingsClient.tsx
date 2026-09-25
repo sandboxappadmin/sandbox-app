@@ -24,9 +24,11 @@ import {
   createCustomField,
   deleteCustomField,
 } from './actions';
+import AvailabilityClient from './AvailabilityClient';
 
 type Tag = { id: string; name: string };
 type CustomField = { id: string; label: string; type: string; options: string[] };
+type Rule = { dayOfWeek: number; startTime: string; endTime: string };
 
 const FIELD_TYPES = ['TEXT', 'NUMBER', 'DATE', 'BOOLEAN', 'DROPDOWN'];
 
@@ -36,12 +38,14 @@ export default function SettingsClient({
   categoryLabel,
   tags,
   customFields,
+  availabilityRules,
 }: {
   slug: string;
   workspaceName: string;
   categoryLabel: string;
   tags: Tag[];
   customFields: CustomField[];
+  availabilityRules: Rule[];
 }) {
   const [name, setName] = useState(workspaceName);
   const [nameSaved, setNameSaved] = useState(false);
@@ -220,7 +224,13 @@ export default function SettingsClient({
                 </Box>
               </Box>
             ))}
+            
           </Stack>
+          </Paper>
+          
+          {/* Booking Availability */}
+        <Paper variant="outlined" sx={{ p: 3 }}>
+          <AvailabilityClient slug={slug} initialRules={availabilityRules} />
         </Paper>
       </Stack>
 

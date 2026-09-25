@@ -2,6 +2,18 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.24.0] - 2026-09-25
+
+### Added
+- Public self-service appointment booking: each niche workspace gets a shareable booking link where leads pick an open time slot themselves, no login required
+- Workspace availability hours configurable per day of week, from Settings
+- APPOINTMENT_BOOKED workflow trigger is now functional — another dormant trigger type that's existed unused since the project's earliest version
+- Internal Appointments page listing upcoming bookings, with cancellation
+- Double-booking protection: the booking action re-verifies a slot is still open at the moment of submission, not just when the page loaded
+
+### Learned
+- Since local and production databases are now separate, every schema migration needs a manual prisma migrate deploy against production afterward, using temporarily-scoped environment variables in a fresh terminal — this is now a standing two-step habit for any future schema change until Render's Pre-Deploy Command becomes available on a paid tier
+
 ## [0.23.0] - 2026-09-25
 
 ### Added

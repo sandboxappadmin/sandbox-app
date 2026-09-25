@@ -21,6 +21,10 @@ export default async function SettingsPage({
     orderBy: { createdAt: 'asc' },
   });
 
+  const availabilityRules = await prisma.availabilityRule.findMany({
+    where: { nicheInstallId: install.id },
+  });
+
   return (
     <SettingsClient
       slug={slug}
@@ -32,6 +36,11 @@ export default async function SettingsPage({
         label: f.label,
         type: f.type,
         options: (f.options as string[] | null) ?? [],
+      }))}
+      availabilityRules={availabilityRules.map((r) => ({
+        dayOfWeek: r.dayOfWeek,
+        startTime: r.startTime,
+        endTime: r.endTime,
       }))}
     />
   );

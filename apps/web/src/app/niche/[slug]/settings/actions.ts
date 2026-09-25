@@ -77,3 +77,20 @@ export async function deleteCustomField(slug: string, fieldId: string) {
 
   revalidatePath(`/niche/${slug}/settings`);
 }
+
+export async function setAvailabilityRules(
+  slug: string,
+  rules: { dayOfWeek: number; startTime: string; endTime: string }[]
+) {
+  const { install } = await getCurrentNicheInstall(slug);
+
+  await prisma.availabilityRule.deleteMany({ where: { nicheInstallId: install.id } });
+
+  if (rules.length > 0) {
+    await prisma.availabilityRule.createMany({
+      data: rules.map((r) => ({ ...r, nicheInstallId: install.id })),
+    });
+  }
+
+  revalidatePath(`/niche/${slug}/settings`);
+}

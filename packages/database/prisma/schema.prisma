@@ -94,6 +94,8 @@ model NicheInstall {
   pipelines        Pipeline[]
   workflows        Workflow[]
   conversations    Conversation[]
+    availabilityRules AvailabilityRule[]
+  appointments Appointment[]
 
   @@index([accountId])
 }
@@ -147,6 +149,7 @@ model Contact {
 
   tags          Tag[]
   opportunities Opportunity[]
+    appointments Appointment[]
 
   @@index([nicheInstallId])
 }
@@ -499,4 +502,39 @@ model Invitation {
 
   @@unique([accountId, email])
   @@index([accountId])
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELED
+}
+
+model AvailabilityRule {
+  id String @id @default(cuid())
+  dayOfWeek Int // 0 = Sunday .. 6 = Saturday
+  startTime String // "09:00" (24hr, workspace-local time)
+  endTime String // "17:00"
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  @@index([nicheInstallId])
+}
+
+model Appointment {
+  id String @id @default(cuid())
+  startsAt DateTime
+  endsAt DateTime
+  status AppointmentStatus @default(CONFIRMED)
+  notes String?
+  createdAt DateTime @default(now())
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  contact Contact @relation(fields: [contactId], references: [id])
+  contactId String
+
+  @@index([nicheInstallId])
+  @@index([contactId])
 }
