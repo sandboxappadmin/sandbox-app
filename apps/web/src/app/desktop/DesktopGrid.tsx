@@ -29,13 +29,15 @@ const NICHE_TILES = [
 export default function DesktopGrid({
   isSuperAdmin = false,
   isOwner = false,
+  canManageAccount = false,
 }: {
   isSuperAdmin?: boolean;
   isOwner?: boolean;
+  canManageAccount?: boolean;
 }) {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <DesktopHeader isSuperAdmin={isSuperAdmin} isOwner={isOwner} />
+      <DesktopHeader isSuperAdmin={isSuperAdmin} isOwner={isOwner} canManageAccount={canManageAccount} />
 
       <Box sx={{ py: 6, px: 3 }}>
         <Box sx={{ textAlign: 'center', mb: 6 }}>
