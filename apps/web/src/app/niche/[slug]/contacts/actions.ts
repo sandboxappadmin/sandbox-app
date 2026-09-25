@@ -51,7 +51,7 @@ export async function bulkImportContacts(slug: string, rows: ImportRow[]) {
           lastName: row.lastName?.trim() || null,
           email,
           phone: row.phone?.trim() || null,
-          customFields,
+          customFields: customFields as any,
         },
       });
       created++;
