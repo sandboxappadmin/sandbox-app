@@ -13,11 +13,62 @@ type ContactFormData = {
   customFields?: Record<string, unknown>;
 };
 
+type ImportRow = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  customFields?: Record<string, unknown>;
+};
+
+export async function bulkImportContacts(slug: string, rows: ImportRow[]) {
+  const { install } = await getCurrentNicheInstall(slug);
+
+  let created = 0;
+  let skipped = 0;
+  const errors: string[] = [];
+
+  for (const row of rows) {
+    try {
+      const email = row.email?.trim() || null;
+
+      if (email) {
+        const existing = await prisma.contact.findFirst({
+          where: { nicheInstallId: install.id, email },
+        });
+        if (existing) {
+          skipped++;
+          continue;
+        }
+      }
+
+      const customFields = await buildValidatedCustomFields(install.id, row.customFields);
+
+      await prisma.contact.create({
+        data: {
+          nicheInstallId: install.id,
+          firstName: row.firstName?.trim() || null,
+          lastName: row.lastName?.trim() || null,
+          email,
+          phone: row.phone?.trim() || null,
+          customFields,
+        },
+      });
+      created++;
+    } catch (err) {
+      errors.push(`${row.firstName ?? ''} ${row.lastName ?? ''}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  }
+
+  revalidatePath(`/niche/${slug}/contacts`);
+  return { created, skipped, errors };
+}
+
 // Re-validates incoming custom field values against this niche's actual
 // CustomFieldDefinition list. Never trust the client blob directly —
 // a stale dialog (old defs cached client-side) or a tampered request
 // could otherwise write arbitrary keys/types into the JSON column.
-async function buildValidatedCustomFields(
+export async function buildValidatedCustomFields(
   nicheInstallId: string,
   submitted: Record<string, unknown> | undefined
 ): Promise<Record<string, unknown>> {

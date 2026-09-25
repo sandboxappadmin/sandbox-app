@@ -2,6 +2,19 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.22.0] - 2026-09-25
+
+### Added
+- CSV contact import: upload a CSV, map its columns to app fields (including custom fields) with auto-guessed mapping based on header names, and import in bulk with duplicate detection by email
+- Reused the existing custom-field validation logic from manual contact creation, so imported values go through the same validation as manually-entered ones
+
+### Fixed
+- A stray useState call landed at module scope instead of inside the component during editing, causing an "Invalid hook call" error — moved inside the actual component body
+- CsvImportDialog was accidentally nested inside the contact edit Dialog's closing tags instead of being a sibling element
+
+### Learned
+- A newly-added npm dependency can have its package.json entry committed correctly while npm install still silently fails to create it in node_modules if run at the wrong time or interrupted — worth directly checking Test-Path node_modules\<package> rather than assuming a "successful-looking" install actually completed
+
 ## [0.21.0] - 2026-09-24
 
 ### Added

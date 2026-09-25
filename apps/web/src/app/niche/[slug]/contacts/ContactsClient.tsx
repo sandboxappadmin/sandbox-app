@@ -34,6 +34,8 @@ import {
 } from './actions';
 import { useRouter } from 'next/navigation';
 import ChatIcon from '@mui/icons-material/Chat';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CsvImportDialog from './CsvImportDialog';
 
 type Tag = { id: string; name: string };
 
@@ -260,6 +262,7 @@ export default function ContactsClient({
   const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+    const [importOpen, setImportOpen] = useState(false);
 
   const openCreateDialog = () => {
     setEditingId(null);
@@ -361,9 +364,14 @@ export default function ContactsClient({
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Contacts
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
-          Add Contact
-        </Button>
+        <Stack direction="row" spacing={1.5}>
+          <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={() => setImportOpen(true)}>
+            Import CSV
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
+            Add Contact
+          </Button>
+        </Stack>
       </Box>
 
       {error && (
@@ -434,7 +442,7 @@ export default function ContactsClient({
               </>
             )}
           </Stack>
-        </DialogContent>
+                </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit} disabled={isPending}>
@@ -442,6 +450,13 @@ export default function ContactsClient({
           </Button>
         </DialogActions>
       </Dialog>
+
+      <CsvImportDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        slug={slug}
+        customFieldDefs={customFieldDefs}
+      />
     </Box>
   );
 }
