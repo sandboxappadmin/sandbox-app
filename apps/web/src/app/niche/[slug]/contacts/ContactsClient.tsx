@@ -36,6 +36,7 @@ import { useRouter } from 'next/navigation';
 import ChatIcon from '@mui/icons-material/Chat';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CsvImportDialog from './CsvImportDialog';
+import Paper from '@mui/material/Paper';
 
 type Tag = { id: string; name: string };
 
@@ -250,11 +251,13 @@ export default function ContactsClient({
   initialContacts,
   allTags,
   customFieldDefs,
+  nicheInstallId,
 }: {
   slug: string;
   initialContacts: Contact[];
   allTags: Tag[];
   customFieldDefs: CustomFieldDef[];
+  nicheInstallId: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -373,6 +376,26 @@ export default function ContactsClient({
           </Button>
         </Stack>
       </Box>
+
+            <Paper variant="outlined" sx={{ p: 2, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            Your public lead form
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Share this link to automatically capture new contacts from ads, your website, or a QR code.
+          </Typography>
+        </Box>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => {
+            navigator.clipboard.writeText(`${window.location.origin}/lead/${nicheInstallId}`);
+          }}
+        >
+          Copy Link
+        </Button>
+      </Paper>
 
       {error && (
         <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>

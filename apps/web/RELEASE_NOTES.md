@@ -1,5 +1,9 @@
 # Updates
 
+## September 25, 2026
+- You can now share a public form link so leads can reach out to you directly, with new submissions automatically becoming Contacts
+- Set up an automation to trigger the moment someone submits your form (Form Submitted trigger)
+
 ## September 24, 2026
 - You can now download a complete copy of your account's data anytime from Account Settings
 - Added a way to request permanent account deletion, per your data privacy rights

@@ -41,6 +41,7 @@ export default async function ContactsPage({
     <ContactsClient
       slug={slug}
       initialContacts={serialized}
+      nicheInstallId={install.id}
       allTags={allTags.map((t) => ({ id: t.id, name: t.name }))}
       customFieldDefs={customFieldDefs.map((d) => ({
         id: d.id,

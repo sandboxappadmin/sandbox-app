@@ -2,6 +2,17 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.23.0] - 2026-09-25
+
+### Added
+- Public lead-capture form: each niche workspace gets a unique, shareable link where anyone can submit their info without logging in, automatically creating a new Contact
+- FORM_SUBMITTED workflow trigger is now functional — a dormant trigger type that's existed unused in the schema since the project's very first version
+- Basic spam protection on the lead form: a honeypot field plus a submission rate limit per workspace
+- Shareable link surfaced directly on the Contacts page with a one-click copy button
+
+### Learned
+- Rather than add a migration for a single optional "message" field on lead submissions, stored it inside the existing customFields JSON column under a reserved key — a pragmatic tradeoff to avoid schema churn for one low-stakes field
+
 ## [0.22.0] - 2026-09-25
 
 ### Added
