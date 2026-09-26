@@ -21,6 +21,7 @@ export default async function ListingsPage({ params }: { params: Promise<{ slug:
     status: l.status,
     description: l.description,
     createdAt: l.createdAt.toISOString(),
+    imageUrls: (l.imageUrls as string[] | null) ?? []
   }));
 
   return <ListingsClient slug={slug} initialListings={serialized} />;

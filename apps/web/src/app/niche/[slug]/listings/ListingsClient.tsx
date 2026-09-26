@@ -30,6 +30,7 @@ type Listing = {
   status: string;
   description: string | null;
   createdAt: string;
+  imageUrls: string[];
 };
 
 const STATUS_OPTIONS = ['ACTIVE', 'UNDER_OFFER', 'SOLD', 'OFF_MARKET'];
@@ -48,6 +49,7 @@ const EMPTY_FORM = {
   squareFeet: '',
   status: 'ACTIVE',
   description: '',
+  imageUrls: '',
 };
 
 export default function ListingsClient({ slug, initialListings }: { slug: string; initialListings: Listing[] }) {
@@ -73,6 +75,7 @@ export default function ListingsClient({ slug, initialListings }: { slug: string
       squareFeet: listing.squareFeet?.toString() ?? '',
       status: listing.status,
       description: listing.description ?? '',
+            imageUrls: (listing as any).imageUrls?.join('\n') ?? '',
     });
     setOpen(true);
   };
@@ -179,6 +182,15 @@ export default function ListingsClient({ slug, initialListings }: { slug: string
               <TextField label="Sq. Ft." type="number" value={form.squareFeet} onChange={(e) => setForm({ ...form, squareFeet: e.target.value })} fullWidth />
             </Stack>
             <TextField label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} fullWidth multiline minRows={3} />
+                      <TextField
+              label="Image URLs (one per line)"
+              value={form.imageUrls}
+              onChange={(e) => setForm({ ...form, imageUrls: e.target.value })}
+              fullWidth
+              multiline
+              minRows={2}
+              helperText="Paste direct image links, one per line"
+            />
           </Stack>
         </DialogContent>
         <DialogActions>

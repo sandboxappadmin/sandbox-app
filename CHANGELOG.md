@@ -2,6 +2,19 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.27.0] - 2026-09-26
+
+### Added
+- Selective niche installation: Desktop now shows only installed workspaces plus an "Add Niche" option, instead of every niche tile regardless of installation status
+- Real estate Listing Page: agents can publish a customizable public showcase page (custom URL, title, description, selected listings) at /showcase/[slug]
+- Listing images via pasted external URLs, shown in the showcase page's grid and detail view
+
+### Fixed
+- Hydration mismatch on the Listing Page settings screen caused by computing window.location.origin during server rendering — moved into useEffect so server and client agree on the first render
+
+### Learned
+- typeof window !== 'undefined' branches in a Client Component still cause a hydration mismatch, since the check itself evaluates differently during SSR vs. the browser's first render — the fix is deferring window-dependent values into useEffect, not just guarding the read
+
 ## [0.26.0] - 2026-09-26
 
 ### Added

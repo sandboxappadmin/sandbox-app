@@ -12,6 +12,7 @@ type ListingInput = {
   squareFeet: string;
   status: string;
   description: string;
+  imageUrls: string;
 };
 
 function toNumberOrNull(value: string): number | null {
@@ -34,6 +35,9 @@ export async function createListing(slug: string, data: ListingInput) {
       squareFeet: toNumberOrNull(data.squareFeet),
       status: data.status as any,
       description: data.description.trim() || null,
+            imageUrls: data.imageUrls
+        ? (data.imageUrls.split('\n').map((u) => u.trim()).filter(Boolean) as any)
+        : [],
     },
   });
 
@@ -53,6 +57,9 @@ export async function updateListing(slug: string, listingId: string, data: Listi
       squareFeet: toNumberOrNull(data.squareFeet),
       status: data.status as any,
       description: data.description.trim() || null,
+            imageUrls: data.imageUrls
+        ? (data.imageUrls.split('\n').map((u) => u.trim()).filter(Boolean) as any)
+        : [],
     },
   });
 

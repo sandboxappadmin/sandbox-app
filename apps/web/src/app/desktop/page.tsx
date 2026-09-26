@@ -19,5 +19,19 @@ export default async function DesktopPage() {
 
   const admin = await isSuperAdmin();
 
-    return <DesktopGrid isSuperAdmin={admin} isOwner={user?.role === 'OWNER'} canManageAccount={user?.role === 'OWNER' || user?.role === 'ADMIN'} />;
+  const installedNiches = user
+    ? await prisma.nicheInstall.findMany({
+        where: { accountId: user.accountId },
+        select: { niche: true, id: true, label: true },
+      })
+    : [];
+
+  return (
+    <DesktopGrid
+      isSuperAdmin={admin}
+      isOwner={user?.role === 'OWNER'}
+      canManageAccount={user?.role === 'OWNER' || user?.role === 'ADMIN'}
+      installedNiches={installedNiches}
+    />
+  );
 }

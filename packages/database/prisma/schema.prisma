@@ -84,6 +84,7 @@ model NicheInstall {
   label     String // e.g. "My Real Estate Workspace" - user-editable display name
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+    listingPage ListingPage?
 
   account   Account @relation(fields: [accountId], references: [id])
   accountId String
@@ -560,6 +561,7 @@ model Listing {
   description String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+    imageUrls Json?
 
   nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
   nicheInstallId String
@@ -567,4 +569,17 @@ model Listing {
   opportunities Opportunity[]
 
   @@index([nicheInstallId])
+}
+
+model ListingPage {
+  id String @id @default(cuid())
+  slug String @unique
+  title String
+  description String?
+  listingIds Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String @unique
 }

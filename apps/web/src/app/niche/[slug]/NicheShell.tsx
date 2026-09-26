@@ -24,6 +24,7 @@ import { UserButton } from '@clerk/nextjs';
 import { getNicheBySlug } from '@/lib/niches';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import HouseIcon from '@mui/icons-material/House';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 
 const DRAWER_WIDTH = 240;
 const MINI_WIDTH = 68;
@@ -51,7 +52,10 @@ export default function NicheShell({
     { label: 'Contacts', icon: PeopleIcon, href: `/niche/${slug}/contacts` },
     { label: 'Pipelines', icon: ViewKanbanIcon, href: `/niche/${slug}/pipelines` },
     ...(nicheType === 'REAL_ESTATE'
-      ? [{ label: 'Listings', icon: HouseIcon, href: `/niche/${slug}/listings` }]
+      ? [
+          { label: 'Listings', icon: HouseIcon, href: `/niche/${slug}/listings` },
+          { label: 'Listing Page', icon: StorefrontIcon, href: `/niche/${slug}/listing-page` },
+        ]
       : []),
     { label: 'Workflows', icon: BoltIcon, href: `/niche/${slug}/workflows` },
     { label: 'Appointments', icon: EventAvailableIcon, href: `/niche/${slug}/appointments` },
