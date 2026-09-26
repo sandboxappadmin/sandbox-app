@@ -1,6 +1,13 @@
 # Updates
 
+## September 26, 2026
+- Real estate workspaces now have a proper Listings section to track your actual properties — address, price, bedrooms, bathrooms, and status
+- Fixed booking times showing 8 hours off from actual Philippine time
+
 ## September 25, 2026
+- Share a booking link so leads can pick their own showing time, no back-and-forth needed
+- Set your available hours for bookings from Settings
+- Automate what happens the moment someone books a showing (Appointment Booked trigger)
 - You can now share a public form link so leads can reach out to you directly, with new submissions automatically becoming Contacts
 - Set up an automation to trigger the moment someone submits your form (Form Submitted trigger)
 

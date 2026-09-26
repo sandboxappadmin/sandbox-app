@@ -96,6 +96,7 @@ model NicheInstall {
   conversations    Conversation[]
     availabilityRules AvailabilityRule[]
   appointments Appointment[]
+    listings Listing[]
 
   @@index([accountId])
 }
@@ -204,6 +205,8 @@ model Opportunity {
   value     Decimal? @db.Decimal(12, 2)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+    listing Listing? @relation(fields: [listingId], references: [id])
+  listingId String?
 
   stage   Stage  @relation(fields: [stageId], references: [id])
   stageId String
@@ -537,4 +540,31 @@ model Appointment {
 
   @@index([nicheInstallId])
   @@index([contactId])
+}
+
+enum ListingStatus {
+  ACTIVE
+  UNDER_OFFER
+  SOLD
+  OFF_MARKET
+}
+
+model Listing {
+  id String @id @default(cuid())
+  address String
+  price Decimal? @db.Decimal(12, 2)
+  bedrooms Int?
+  bathrooms Int?
+  squareFeet Int?
+  status ListingStatus @default(ACTIVE)
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
+  nicheInstallId String
+
+  opportunities Opportunity[]
+
+  @@index([nicheInstallId])
 }

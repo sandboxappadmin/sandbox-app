@@ -22,7 +22,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MenuIcon from '@mui/icons-material/Menu';
 import { UserButton } from '@clerk/nextjs';
 import { getNicheBySlug } from '@/lib/niches';
-
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import HouseIcon from '@mui/icons-material/House';
 
 const DRAWER_WIDTH = 240;
 const MINI_WIDTH = 68;
@@ -39,17 +40,23 @@ export default function NicheShell({
   const router = useRouter();
   const pathname = usePathname();
 
+    const [collapsed, setCollapsed] = useState(false);
+  const categoryLabel = getNicheBySlug(slug)?.label ?? '';
+  const drawerWidth = collapsed ? MINI_WIDTH : DRAWER_WIDTH;
+
+    const nicheType = getNicheBySlug(slug)?.type;
+
   const navItems = [
     { label: 'Dashboard', icon: DashboardIcon, href: `/niche/${slug}/dashboard` },
     { label: 'Contacts', icon: PeopleIcon, href: `/niche/${slug}/contacts` },
     { label: 'Pipelines', icon: ViewKanbanIcon, href: `/niche/${slug}/pipelines` },
+    ...(nicheType === 'REAL_ESTATE'
+      ? [{ label: 'Listings', icon: HouseIcon, href: `/niche/${slug}/listings` }]
+      : []),
     { label: 'Workflows', icon: BoltIcon, href: `/niche/${slug}/workflows` },
+    { label: 'Appointments', icon: EventAvailableIcon, href: `/niche/${slug}/appointments` },
     { label: 'Settings', icon: SettingsIcon, href: `/niche/${slug}/settings` },
   ];
-
-    const [collapsed, setCollapsed] = useState(false);
-  const categoryLabel = getNicheBySlug(slug)?.label ?? '';
-  const drawerWidth = collapsed ? MINI_WIDTH : DRAWER_WIDTH;
   
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>

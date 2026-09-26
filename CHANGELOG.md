@@ -2,6 +2,20 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.25.0] - 2026-09-26
+
+### Added
+- Real estate Listings: a proper Property entity (address, price, bedrooms, bathrooms, square footage, status) replacing generic custom fields for tracking properties — visible only in Real Estate workspaces
+- Opportunities can now optionally reference a specific Listing
+
+### Fixed
+- A duplicate navItems declaration in NicheShell.tsx caused a build error after adding the Listings nav item conditionally
+- TZ=Asia/Manila added to both apps/web and apps/api on Render, fixing booking times displaying 8 hours off (server defaulted to UTC)
+
+### Learned
+- A stale PowerShell session with temporary production DATABASE_URL/DIRECT_URL overrides still active can silently redirect a later, unrelated local migrate dev command at production instead of local dev — confirmed this happened with add_listings landing on production ahead of the intended local-first sequence. Always verify a fresh terminal's actual env before running migration commands, and never reuse a terminal that had production credentials temporarily set
+- Upstash Redis's free tier (500,000 commands/month) can be exhausted by a continuously-polling BullMQ worker well before expected — upgraded to Pay-as-you-go to remove the hard cap
+
 ## [0.24.0] - 2026-09-25
 
 ### Added
