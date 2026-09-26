@@ -2,6 +2,15 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.26.0] - 2026-09-26
+
+### Added
+- Real reporting dashboard for every niche workspace, replacing the placeholder: total contacts, open opportunities, pipeline value, active workflow count, and upcoming appointment count
+- Opportunities-by-stage bar chart and new-contacts-over-30-days line chart, using Recharts
+
+### Learned
+- Installed recharts@2.x, which npm flagged as deprecated in favor of v3 — left on 2.x for now since it works correctly and a major version bump warrants checking for breaking API changes first rather than upgrading reactively
+
 ## [0.25.0] - 2026-09-26
 
 ### Added

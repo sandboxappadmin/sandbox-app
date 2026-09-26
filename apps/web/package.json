@@ -26,7 +26,8 @@
     "@repo/crypto": "*",
     "@repo/paymongo": "*",
     "@repo/sms": "*",
-    "papaparse": "^5.4.1"
+    "papaparse": "^5.4.1",
+    "recharts": "^2.12.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

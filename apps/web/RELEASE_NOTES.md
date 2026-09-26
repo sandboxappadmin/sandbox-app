@@ -1,6 +1,7 @@
 # Updates
 
 ## September 26, 2026
+- Added a real dashboard to every workspace — see your pipeline value, contact growth, and open opportunities at a glance
 - Real estate workspaces now have a proper Listings section to track your actual properties — address, price, bedrooms, bathrooms, and status
 - Fixed booking times showing 8 hours off from actual Philippine time
 
