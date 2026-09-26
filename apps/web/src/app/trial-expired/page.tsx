@@ -4,6 +4,7 @@ import Button from '@mui/material/Button';
 import { SignOutButton } from '@clerk/nextjs';
 import { startCheckout } from '../billing/actions';
 import { PLAN_PRICE_PHP } from '@repo/paymongo';
+import PlanOptionsClient from '../billing/PlanOptionsClient';
 
 export default async function TrialExpiredPage({
   searchParams,
@@ -37,11 +38,7 @@ export default async function TrialExpiredPage({
         </Typography>
       </Box>
 
-      <form action={startCheckout}>
-        <Button type="submit" variant="contained" size="large">
-          {isRenewal ? 'Renew Now' : 'Subscribe Now'}
-        </Button>
-      </form>
+            <PlanOptionsClient />
 
       <SignOutButton redirectUrl="/">
         <Button variant="outlined">Sign Out</Button>
