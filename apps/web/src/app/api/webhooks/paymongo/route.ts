@@ -34,57 +34,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, warning: 'no reference_number found' });
     }
 
-    //     const ghlRequest = await prisma.ghlRequest.findUnique({ where: { id: referenceNumber } });
-    // if (ghlRequest) {
-    //   await prisma.ghlRequest.update({
-    //     where: { id: ghlRequest.id },
-    //     data: { status: 'PAID', paidAt: new Date() },
-    //   });
-
-      const account = await prisma.account.findUnique({ where: { id: ghlRequest.accountId } });
-
-      await prisma.ticket.create({
-        data: {
-          subject: `[GHL Sub-Account Request] ${account?.name}`,
-          accountId: ghlRequest.accountId,
-          createdByUserId: (await prisma.user.findFirst({ where: { accountId: ghlRequest.accountId, role: 'OWNER' } }))!.id,
-          messages: {
-            create: {
-              body: `Payment of ₱799 received for a GHL sub-account.\n\nBusiness name for GHL: ${ghlRequest.businessName}\nAdditional notes: ${ghlRequest.notes ?? 'None'}\n\nPlease provision the sub-account and inform the customer.`,
-              authorUserId: (await prisma.user.findFirst({ where: { accountId: ghlRequest.accountId, role: 'OWNER' } }))!.id,
-              isFromSupport: false,
-            },
-          },
-        },
-      });
-
-      const adminEmails = (process.env.SUPER_ADMIN_EMAILS ?? '')
-        .split(',')
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean);
-      const admins = await prisma.user.findMany({ where: { email: { in: adminEmails } } });
-
-      await prisma.notification.createMany({
-        data: admins.map((admin) => ({
-          userId: admin.id,
-          type: 'TICKET_REPLY' as const,
-          title: `GHL payment received: ${account?.name}`,
-          body: `${ghlRequest.businessName} — ready to provision. Review in the admin ticket queue.`,
-          linkUrl: '/admin/tickets',
-        })),
-      });
-
-      console.log(`[paymongo webhook] GHL request ${ghlRequest.id} paid, ticket created`);
-      return NextResponse.json({ received: true });
-    }
-    
     const account = await prisma.account.findUnique({ where: { id: referenceNumber } });
     if (!account) {
       console.error(`[paymongo webhook] No account found for reference_number ${referenceNumber}`);
       return NextResponse.json({ received: true, warning: 'account not found' });
     }
 
-        const existingSubscription = await prisma.subscription.findUnique({
+    const existingSubscription = await prisma.subscription.findUnique({
       where: { accountId: account.id },
     });
 
