@@ -2,6 +2,22 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.28.0] - 2026-09-26
+
+### Added
+- Sandbox App + GHL Sub-Account bundle plan (₱799/month) — one combined subscription and renewal date instead of a separate manual request, via a new planType field on Subscription
+- Upgrading to the bundle charges ₱799 immediately and adds 30 days to the current renewal date; downgrading back to Sandbox App only takes effect at the next renewal, applied automatically by the existing daily renewal-check job
+- Account Settings shows a "Go to GHL" link and downgrade option for bundle subscribers, or the upgrade offer for Sandbox-only subscribers
+- Recommended Tools section in Account Settings for affiliate/referral links (GHL agency plans, certifications), structured to make adding more offers later a one-line addition
+- GHL sub-account requests can now be started directly from Account Settings, not just when Sandbox App access has lapsed
+
+### Fixed
+- GHL billing now flows through the same webhook and Subscription model as the regular plan, rather than a separate one-off payment record, so renewal reminders, the trial-expired flow, and admin visibility all apply consistently regardless of which plan a customer is on
+
+### Learned
+- Local Neon databases on the free tier can go idle and briefly fail to connect on the first request after a period of inactivity — usually resolved by a simple retry once the compute wakes back up
+- Modeling "which plan a customer is on" as a field on the existing Subscription, rather than a parallel one-off request table, kept renewal logic, reminders, and admin tooling working uniformly across both plan tiers instead of duplicating that logic for a second billing path
+
 ## [0.27.0] - 2026-09-26
 
 ### Added

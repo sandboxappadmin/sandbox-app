@@ -26,6 +26,10 @@ import {
 } from './actions';
 import { startCheckout } from '../billing/actions';
 import { exportAccountData, requestAccountDeletion } from './data-actions';
+import AffiliateOffersSection from './AffiliateOffersSection';
+import PlanOptionsClient from '../billing/PlanOptionsClient';
+import { scheduleDowngradeToSandboxOnly, cancelPendingDowngrade } from '../billing/ghl-actions';
+import LaunchIcon from '@mui/icons-material/Launch';
 
 type DnsRecord = { record: string; name: string; type: string; value: string; ttl: string };
 type Domain = { id: string; domain: string; status: string; records: DnsRecord[] };
@@ -40,6 +44,8 @@ type Subscription = {
   status: string;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
+  planType: string; 
+  pendingPlanType: string | null;
 } | null;
 
 export default function AccountSettingsClient({
@@ -134,6 +140,59 @@ export default function AccountSettingsClient({
         Settings here apply across your whole account, not just one workspace.
       </Typography>
 
+              <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
+          GHL Sub-Account
+        </Typography>
+
+        {subscription?.planType === 'SANDBOX_PLUS_GHL' ? (
+          <Stack spacing={1.5}>
+            <Typography variant="body2" color="text.secondary">
+              Your plan includes a GHL sub-account.
+            </Typography>
+            <Button
+              variant="outlined"
+              endIcon={<LaunchIcon fontSize="small" />}
+              href="https://app.gohighlevel.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              Go to GHL
+            </Button>
+
+            {subscription.pendingPlanType === 'SANDBOX_ONLY' ? (
+              <Alert
+                severity="info"
+                action={
+                  <Button size="small" onClick={() => startTransition(() => cancelPendingDowngrade())}>
+                    Cancel
+                  </Button>
+                }
+              >
+                Switching to Sandbox App only at your next renewal.
+              </Alert>
+            ) : (
+              <Button
+                size="small"
+                color="error"
+                variant="text"
+                onClick={() => {
+                  if (window.confirm('Switch to Sandbox App only at your next renewal? You\'ll keep GHL access until then.')) {
+                    startTransition(() => scheduleDowngradeToSandboxOnly());
+                  }
+                }}
+                sx={{ alignSelf: 'flex-start' }}
+              >
+                Downgrade to Sandbox App only
+              </Button>
+            )}
+          </Stack>
+        ) : (
+          <PlanOptionsClient hideSubscribeCard />
+        )}
+      </Paper>
+
             {subscription && (
         <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
@@ -175,6 +234,8 @@ export default function AccountSettingsClient({
           )}
         </Paper>
       )}
+
+            <AffiliateOffersSection />
 
             <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>

@@ -197,6 +197,18 @@ async function checkRenewals() {
     console.log(`[renewal-check] Notified account ${sub.accountId} (${label} ending ${endDate?.toISOString()})`);
   }
 
+    const duePendingDowngrades = await prisma.subscription.findMany({
+    where: { pendingPlanType: { not: null }, currentPeriodEnd: { lte: now } },
+  });
+
+  for (const sub of duePendingDowngrades) {
+    await prisma.subscription.update({
+      where: { id: sub.id },
+      data: { planType: sub.pendingPlanType!, pendingPlanType: null },
+    });
+    console.log(`[renewal-check] Applied scheduled downgrade for account ${sub.accountId} to ${sub.pendingPlanType}`);
+  }
+
   console.log(`[renewal-check] Checked, ${dueSoon.length} notification(s) sent`);
 }
 

@@ -13,20 +13,19 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Alert from '@mui/material/Alert';
 import { startCheckout } from './actions';
-import { requestGhlSubAccount } from './ghl-actions';
 import { PLAN_PRICE_PHP } from '@repo/paymongo';
+import { startGhlCheckout } from './ghl-actions';
+import { startGhlUpgradeCheckout } from './ghl-actions';
 
-export default function PlanOptionsClient() {
-  const [ghlOpen, setGhlOpen] = useState(false);
+export default function PlanOptionsClient({ hideSubscribeCard = false }: { hideSubscribeCard?: boolean }) {  const [ghlOpen, setGhlOpen] = useState(false);
   const [businessName, setBusinessName] = useState('');
   const [notes, setNotes] = useState('');
   const [requested, setRequested] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleGhlRequest = () => {
-    startTransition(async () => {
-      await requestGhlSubAccount(businessName, notes);
-      setRequested(true);
+      const handleGhlRequest = () => {
+    startTransition(() => {
+      startGhlUpgradeCheckout(businessName, notes);
     });
   };
 
@@ -54,11 +53,11 @@ export default function PlanOptionsClient() {
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
             GHL Sub-Account
           </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
             ₱799<Typography component="span" variant="body2" color="text.secondary">/month</Typography>
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            A GoHighLevel sub-account, set up for you. Billed and provisioned manually — reach out to get started.
+            Everything in Sandbox App, plus a GHL sub-account — set up for you, billed together.
           </Typography>
           <Button variant="outlined" fullWidth onClick={() => setGhlOpen(true)}>
             Request Setup
@@ -69,11 +68,6 @@ export default function PlanOptionsClient() {
       <Dialog open={ghlOpen} onClose={() => setGhlOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>Request GHL Sub-Account</DialogTitle>
         <DialogContent>
-          {requested ? (
-            <Alert severity="success">
-              Request received. We'll reach out shortly to set up billing and your sub-account.
-            </Alert>
-          ) : (
             <Stack spacing={2} sx={{ mt: 1 }}>
               <TextField
                 label="Business Name"
@@ -90,7 +84,6 @@ export default function PlanOptionsClient() {
                 minRows={2}
               />
             </Stack>
-          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setGhlOpen(false)}>{requested ? 'Close' : 'Cancel'}</Button>

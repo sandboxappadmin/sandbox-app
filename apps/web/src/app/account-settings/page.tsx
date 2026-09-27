@@ -38,9 +38,9 @@ export default async function AccountSettingsPage() {
     select: { id: true },
   });
 
-    const subscription = await prisma.subscription.findUnique({
+      const subscription = await prisma.subscription.findUnique({
     where: { accountId: user.accountId },
-    select: { status: true, trialEndsAt: true, currentPeriodEnd: true },
+    select: { status: true, trialEndsAt: true, currentPeriodEnd: true, planType: true, pendingPlanType: true },
   });
 
     return (
@@ -49,12 +49,14 @@ export default async function AccountSettingsPage() {
       <AccountSettingsClient
         domains={serialized}
         smsConnected={Boolean(smsCredential)}
-        subscription={
+                subscription={
           subscription
             ? {
                 status: subscription.status,
                 trialEndsAt: subscription.trialEndsAt?.toISOString() ?? null,
                 currentPeriodEnd: subscription.currentPeriodEnd?.toISOString() ?? null,
+                planType: subscription.planType,
+                pendingPlanType: subscription.pendingPlanType,
               }
             : null
         }

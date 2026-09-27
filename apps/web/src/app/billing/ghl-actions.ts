@@ -1,41 +1,72 @@
 'use server';
 
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@repo/database';
 import { assertOwner } from '@/lib/roles';
+import { createCheckoutSession } from '@repo/paymongo';
 
-export async function requestGhlSubAccount(businessName: string, notes: string) {
+export async function startGhlUpgradeCheckout(businessName: string, notes: string) {
   const user = await assertOwner();
 
-  const account = await prisma.account.findUnique({ where: { id: user.accountId } });
+  if (!businessName.trim()) {
+    throw new Error('Business name is required');
+  }
 
-  await prisma.ticket.create({
+  await prisma.ghlRequest.create({
     data: {
-      subject: `[GHL Sub-Account Request] ${account?.name}`,
       accountId: user.accountId,
-      createdByUserId: user.id,
-      messages: {
-        create: {
-          body: `This account has requested a GHL sub-account (₱799/month, billed separately).\n\nRequested by: ${user.name} (${user.email})\nBusiness name for GHL: ${businessName}\nAdditional notes: ${notes || 'None'}\n\nPlease reach out to set up billing and provision the sub-account.`,
-          authorUserId: user.id,
-          isFromSupport: false,
-        },
-      },
+      businessName: businessName.trim(),
+      notes: notes.trim() || null,
     },
   });
 
-  const adminEmails = (process.env.SUPER_ADMIN_EMAILS ?? '')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  const admins = await prisma.user.findMany({ where: { email: { in: adminEmails } } });
-
-  await prisma.notification.createMany({
-    data: admins.map((admin) => ({
-      userId: admin.id,
-      type: 'TICKET_REPLY' as const,
-      title: `GHL sub-account requested: ${account?.name}`,
-      body: `${businessName} — review in the admin ticket queue.`,
-      linkUrl: '/admin/tickets',
-    })),
+  await prisma.subscription.update({
+    where: { accountId: user.accountId },
+    data: { pendingCheckoutPlanType: 'SANDBOX_PLUS_GHL' },
   });
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.snbxpro.com';
+
+  const result = await createCheckoutSession(
+    user.accountId,
+    user.email,
+    `${baseUrl}/billing/success`,
+    `${baseUrl}/billing/cancel`,
+    { name: 'Sandbox App + GHL Sub-Account — Monthly', amountCentavos: 79900 }
+  );
+
+  if (!result.ok) {
+    console.error('[ghl-billing] Failed to create checkout session:', result.error, result.raw);
+    throw new Error('Could not start checkout. Please try again or contact support.');
+  }
+
+  await prisma.subscription.update({
+    where: { accountId: user.accountId },
+    data: { paymongoCheckoutSessionId: result.sessionId },
+  });
+
+  redirect(result.checkoutUrl);
+}
+
+export async function scheduleDowngradeToSandboxOnly() {
+  const user = await assertOwner();
+
+  await prisma.subscription.update({
+    where: { accountId: user.accountId },
+    data: { pendingPlanType: 'SANDBOX_ONLY' },
+  });
+
+  revalidatePath('/account-settings');
+}
+
+export async function cancelPendingDowngrade() {
+  const user = await assertOwner();
+
+  await prisma.subscription.update({
+    where: { accountId: user.accountId },
+    data: { pendingPlanType: null },
+  });
+
+  revalidatePath('/account-settings');
 }

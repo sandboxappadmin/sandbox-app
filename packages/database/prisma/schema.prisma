@@ -34,6 +34,7 @@ model Account {
   sendingDomains SendingDomain[]
   tickets        Ticket[]
     invitations Invitation[]
+      ghlRequests GhlRequest[]
 }
 
 enum Role {
@@ -448,17 +449,20 @@ enum SubscriptionStatus {
 }
 
 model Subscription {
-  id                        String             @id @default(cuid())
-  status                    SubscriptionStatus @default(TRIALING)
-  trialEndsAt               DateTime?
-  currentPeriodEnd          DateTime?
+  id String @id @default(cuid())
+  status SubscriptionStatus @default(TRIALING)
+  planType SubscriptionPlanType @default(SANDBOX_ONLY)
+  pendingPlanType SubscriptionPlanType?
+  pendingCheckoutPlanType SubscriptionPlanType?
+  trialEndsAt DateTime?
+  currentPeriodEnd DateTime?
   paymongoCheckoutSessionId String?
-  createdAt                 DateTime           @default(now())
-  updatedAt                 DateTime           @updatedAt
-  renewalReminderSentAt     DateTime?
+  renewalReminderSentAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  account   Account @relation(fields: [accountId], references: [id])
-  accountId String  @unique
+  account Account @relation(fields: [accountId], references: [id])
+  accountId String @unique
 }
 
 enum NotificationType {
@@ -582,4 +586,26 @@ model ListingPage {
 
   nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
   nicheInstallId String @unique
+}
+
+enum GhlRequestStatus {
+  PENDING_PAYMENT
+  PAID
+}
+
+model GhlRequest {
+  id String @id @default(cuid())
+  status GhlRequestStatus @default(PENDING_PAYMENT)
+  businessName String
+  notes String?
+  createdAt DateTime @default(now())
+  paidAt DateTime?
+
+  account Account @relation(fields: [accountId], references: [id])
+  accountId String
+}
+
+enum SubscriptionPlanType {
+  SANDBOX_ONLY
+  SANDBOX_PLUS_GHL
 }

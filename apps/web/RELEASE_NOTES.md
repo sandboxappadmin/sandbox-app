@@ -1,9 +1,14 @@
 # Updates
 
 ## September 26, 2026
+- The Desktop screen now only shows the workspaces you've actually installed, with a clear way to add more anytime
+- Real estate agents can now publish a shareable property showcase page for their listings
 - Added a real dashboard to every workspace — see your pipeline value, contact growth, and open opportunities at a glance
 - Real estate workspaces now have a proper Listings section to track your actual properties — address, price, bedrooms, bathrooms, and status
 - Fixed booking times showing 8 hours off from actual Philippine time
+- Introduced a Sandbox App + GHL Sub-Account bundle plan (₱799/month) — one payment covers both, with a link to log into GHL right from your account
+- You can now request a GHL sub-account or upgrade your plan anytime from Account Settings, not just when your access has lapsed
+- Added a Recommended Tools section with useful add-ons and certifications
 
 ## September 25, 2026
 - Share a booking link so leads can pick their own showing time, no back-and-forth needed

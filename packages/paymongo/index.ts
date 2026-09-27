@@ -16,7 +16,8 @@ export async function createCheckoutSession(
   referenceNumber: string,
   customerEmail: string,
   successUrl: string,
-  cancelUrl: string
+  cancelUrl: string,
+  lineItem?: { name: string; amountCentavos: number }
 ): Promise<CreateCheckoutSessionResult> {
   const secretKey = process.env.PAYMONGO_SECRET_KEY;
   if (!secretKey) {
@@ -41,10 +42,10 @@ export async function createCheckoutSession(
              body: JSON.stringify({
         data: {
           attributes: {
-            line_items: [
+                        line_items: [
               {
-                name: 'Sandbox App Subscription — Monthly',
-                amount: PLAN_PRICE_CENTAVOS,
+                name: lineItem?.name ?? 'Sandbox App Subscription — Monthly',
+                amount: lineItem?.amountCentavos ?? PLAN_PRICE_CENTAVOS,
                 currency: 'PHP',
                 quantity: 1,
               },
