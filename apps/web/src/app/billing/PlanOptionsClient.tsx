@@ -14,7 +14,6 @@ import DialogActions from '@mui/material/DialogActions';
 import Alert from '@mui/material/Alert';
 import { startCheckout } from './actions';
 import { PLAN_PRICE_PHP } from '@repo/paymongo';
-import { startGhlCheckout } from './ghl-actions';
 import { startGhlUpgradeCheckout } from './ghl-actions';
 
 export default function PlanOptionsClient({ hideSubscribeCard = false }: { hideSubscribeCard?: boolean }) {  const [ghlOpen, setGhlOpen] = useState(false);
@@ -25,7 +24,7 @@ export default function PlanOptionsClient({ hideSubscribeCard = false }: { hideS
 
       const handleGhlRequest = () => {
     startTransition(() => {
-      startGhlUpgradeCheckout(businessName, notes);
+            startGhlUpgradeCheckout(businessName, notes);
     });
   };
 
