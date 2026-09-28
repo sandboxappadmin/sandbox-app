@@ -1,5 +1,8 @@
 # Updates
 
+## September 28, 2026
+- You can now upload photos straight from your phone or computer when adding or editing a listing, instead of pasting image links
+
 ## September 26, 2026
 - The Desktop screen now only shows the workspaces you've actually installed, with a clear way to add more anytime
 - Real estate agents can now publish a shareable property showcase page for their listings

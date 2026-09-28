@@ -19,6 +19,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createListing, updateListing, deleteListing } from './actions';
+import ImageUploader from './ImageUploader';
 
 type Listing = {
   id: string;
@@ -181,16 +182,15 @@ export default function ListingsClient({ slug, initialListings }: { slug: string
               <TextField label="Bathrooms" type="number" value={form.bathrooms} onChange={(e) => setForm({ ...form, bathrooms: e.target.value })} fullWidth />
               <TextField label="Sq. Ft." type="number" value={form.squareFeet} onChange={(e) => setForm({ ...form, squareFeet: e.target.value })} fullWidth />
             </Stack>
-            <TextField label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} fullWidth multiline minRows={3} />
-                      <TextField
-              label="Image URLs (one per line)"
-              value={form.imageUrls}
-              onChange={(e) => setForm({ ...form, imageUrls: e.target.value })}
-              fullWidth
-              multiline
-              minRows={2}
-              helperText="Paste direct image links, one per line"
-            />
+                        <Box>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Photos
+              </Typography>
+              <ImageUploader
+                urls={form.imageUrls.split('\n').map((u) => u.trim()).filter(Boolean)}
+                onChange={(urls) => setForm({ ...form, imageUrls: urls.join('\n') })}
+              />
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions>

@@ -2,6 +2,19 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.29.0] - 2026-09-28
+
+### Added
+- Real photo upload for property listings: agents upload photos directly from their device instead of pasting external image links. Uploads go straight from the browser to Cloudinary using server-signed requests, so the app server never handles the file data and only logged-in users with an active account can upload
+- Photo thumbnails in the listing form, with a remove button on each
+- Showcase pages request resized, compressed versions of Cloudinary photos to keep delivered bandwidth low (drop this bullet if you skipped the optional optimizeImageUrl step)
+
+### Learned
+- The Listing.imageUrls JSON field from the earlier "paste URLs" stopgap needed no schema change or migration, since uploaded photos are just more URLs in the same field. Existing listings with pasted links keep working
+- Uploads can be tested on localhost because they go browser-to-Cloudinary with no webhook involved, unlike billing and Clerk flows
+- Cloudinary's free plan (25 credits/month, no card) can suspend the account at quota rather than bill overage. Worth watching the usage meter as listing volume grows
+- Known gaps: the 10 MB size limit is enforced only in the browser, and removing a photo from a listing unlinks it without deleting the file from Cloudinary
+
 ## [0.28.1] - 2026-09-27
 
 ### Fixed
