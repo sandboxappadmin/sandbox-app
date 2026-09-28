@@ -13,6 +13,9 @@ All notable changes to Sandbox App will be documented here.
 
 ### Fixed
 - GHL billing now flows through the same webhook and Subscription model as the regular plan, rather than a separate one-off payment record, so renewal reminders, the trial-expired flow, and admin visibility all apply consistently regardless of which plan a customer is on
+- Renewing early from Account Settings always charged ₱299, even for accounts on the ₱799 bundle, because startCheckout hardcoded the Sandbox-only price. It now checks the account's planType and charges the matching amount
+- Removed a half-commented-out legacy GHL branch from the PayMongo webhook that broke the build (a stray return and a duplicate variable declaration left over from the redesign)
+- PlanOptionsClient still imported the old startGhlCheckout name after the rename to startGhlUpgradeCheckout
 
 ### Learned
 - Local Neon databases on the free tier can go idle and briefly fail to connect on the first request after a period of inactivity — usually resolved by a simple retry once the compute wakes back up
