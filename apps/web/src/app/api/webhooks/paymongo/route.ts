@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@repo/database';
 import { verifyPaymongoSignature } from '@repo/paymongo';
 import { revalidatePath } from 'next/cache';
-import { PLAN_PRICE_PHP } from '@repo/paymongo';
+import { PLAN_PRICE_PHP, GHL_BUNDLE_PRICE_PHP } from '@repo/paymongo';
 
 export async function POST(req: Request) {
   const signatureHeader = req.headers.get('paymongo-signature') ?? req.headers.get('x-paymongo-signature');
@@ -128,14 +128,35 @@ export async function POST(req: Request) {
     revalidatePath('/admin/accounts');
     revalidatePath('/account-settings');
 
-    const owner = await prisma.user.findFirst({ where: { accountId: account.id, role: 'OWNER' } });
+        const owner = await prisma.user.findFirst({ where: { accountId: account.id, role: 'OWNER' } });
     if (owner?.email) {
+      const isBundle = newPlanType === 'SANDBOX_PLUS_GHL';
+      const amountPhp = isBundle ? GHL_BUNDLE_PRICE_PHP : PLAN_PRICE_PHP;
+      const planLabel = isBundle ? 'Sandbox App + GHL Sub-Account' : 'Sandbox App';
+
+      const lines = [
+        'Hi,',
+        '',
+        `This confirms your payment of ₱${amountPhp} for ${planLabel}.`,
+        '',
+        `Your subscription is now active through ${currentPeriodEnd.toLocaleDateString()}.`,
+      ];
+
+      if (isNewGhlUpgrade) {
+        lines.push(
+          '',
+          "We'll set up your GHL sub-account and reach out once it's ready.",
+        );
+      }
+
+      lines.push('', 'Thanks for using Sandbox App.');
+
       const { sendEmail } = await import('@repo/email');
       await sendEmail({
         from: 'Sandbox App <hello@email.snbxpro.com>',
         to: owner.email,
-        subject: 'Payment Receipt — Sandbox App',
-        text: `Hi,\n\nThis confirms your payment of ₱${PLAN_PRICE_PHP} for Sandbox App.\n\nYour subscription is now active${currentPeriodEnd ? ` through ${currentPeriodEnd.toLocaleDateString()}` : ''}.\n\nThanks for using Sandbox App.`,
+        subject: `Payment Receipt — ${planLabel}`,
+        text: lines.join('\n'),
       });
     }
 

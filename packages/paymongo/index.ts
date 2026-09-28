@@ -4,6 +4,8 @@ const PAYMONGO_API_URL = 'https://api.paymongo.com/v2/checkout_sessions';
 
 export const PLAN_PRICE_PHP = 299;
 export const PLAN_PRICE_CENTAVOS = PLAN_PRICE_PHP * 100;
+export const GHL_BUNDLE_PRICE_PHP = 799;
+export const GHL_BUNDLE_PRICE_CENTAVOS = GHL_BUNDLE_PRICE_PHP * 100;
 
 type CreateCheckoutSessionResult =
   | { ok: true; checkoutUrl: string; sessionId: string; raw: unknown }

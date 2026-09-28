@@ -2,6 +2,12 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.28.1] - 2026-09-27
+
+### Fixed
+- Payment receipt emails always showed ₱299 for "Sandbox App", even for the ₱799 bundle. Receipts now show the correct amount and plan name, and mention the GHL sub-account setup only on the first upgrade
+- Added GHL_BUNDLE_PRICE_PHP and GHL_BUNDLE_PRICE_CENTAVOS to @repo/paymongo so the bundle price has one source of truth instead of being hardcoded in several files
+
 ## [0.28.0] - 2026-09-26
 
 ### Added
