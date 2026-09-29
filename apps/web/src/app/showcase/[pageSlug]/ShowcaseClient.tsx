@@ -11,10 +11,20 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import Avatar from '@mui/material/Avatar';
+import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
 import BedIcon from '@mui/icons-material/Bed';
 import BathtubIcon from '@mui/icons-material/Bathtub';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import { optimizeImageUrl } from '@/lib/image-url';
 
 type Listing = {
   id: string;
@@ -28,6 +38,14 @@ type Listing = {
   imageUrls: string[];
 };
 
+type Agent = {
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  photoUrl: string | null;
+  bio: string | null;
+} | null;
+
 const STATUS_COLORS: Record<string, 'success' | 'warning' | 'default' | 'error'> = {
   ACTIVE: 'success',
   UNDER_OFFER: 'warning',
@@ -35,16 +53,37 @@ const STATUS_COLORS: Record<string, 'success' | 'warning' | 'default' | 'error'>
   OFF_MARKET: 'error',
 };
 
+const STATUS_FILTER_OPTIONS = [
+  { value: 'ALL', label: 'All Statuses' },
+  { value: 'ACTIVE', label: 'For Sale' },
+  { value: 'UNDER_OFFER', label: 'Under Offer' },
+  { value: 'SOLD', label: 'Sold' },
+];
+
 export default function ShowcaseClient({
   title,
   description,
   listings,
+  agent,
 }: {
   title: string;
   description: string | null;
   listings: Listing[];
+  agent: Agent;
 }) {
   const [selected, setSelected] = useState<Listing | null>(null);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minBeds, setMinBeds] = useState('ANY');
+  const [status, setStatus] = useState('ALL');
+
+  const filtered = listings.filter((l) => {
+    if (status !== 'ALL' && l.status !== status) return false;
+    if (minPrice && (l.price ?? 0) < Number(minPrice)) return false;
+    if (maxPrice && (l.price ?? Infinity) > Number(maxPrice)) return false;
+    if (minBeds !== 'ANY' && (l.bedrooms ?? 0) < Number(minBeds)) return false;
+    return true;
+  });
 
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', px: 3, py: { xs: 4, md: 6 } }}>
@@ -52,13 +91,84 @@ export default function ShowcaseClient({
         {title}
       </Typography>
       {description && (
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           {description}
         </Typography>
       )}
 
-      {listings.length === 0 && (
-        <Typography color="text.disabled">No listings available right now.</Typography>
+      {agent && (agent.name || agent.phone || agent.email) && (
+        <Paper variant="outlined" sx={{ p: 2.5, mb: 4, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Avatar
+            src={agent.photoUrl ? optimizeImageUrl(agent.photoUrl, 120) : undefined}
+            sx={{ width: 64, height: 64 }}
+          >
+            {agent.name?.[0] ?? '?'}
+          </Avatar>
+          <Box sx={{ flexGrow: 1, minWidth: 200 }}>
+            {agent.name && (
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                {agent.name}
+              </Typography>
+            )}
+            {agent.bio && (
+              <Typography variant="body2" color="text.secondary">
+                {agent.bio}
+              </Typography>
+            )}
+          </Box>
+          <Stack direction="row" spacing={1}>
+            {agent.phone && (
+              <Button size="small" variant="outlined" startIcon={<PhoneIcon />} href={`tel:${agent.phone}`}>
+                Call
+              </Button>
+            )}
+            {agent.email && (
+              <Button size="small" variant="outlined" startIcon={<EmailIcon />} href={`mailto:${agent.email}`}>
+                Email
+              </Button>
+            )}
+          </Stack>
+        </Paper>
+      )}
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+        <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', gap: 2 }}>
+          <TextField
+            size="small"
+            label="Min Price"
+            type="number"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            sx={{ width: 140 }}
+          />
+          <TextField
+            size="small"
+            label="Max Price"
+            type="number"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            sx={{ width: 140 }}
+          />
+          <Select size="small" value={minBeds} onChange={(e) => setMinBeds(e.target.value)} sx={{ width: 140 }}>
+            <MenuItem value="ANY">Any Beds</MenuItem>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <MenuItem key={n} value={n}>
+                {n}+ Beds
+              </MenuItem>
+            ))}
+          </Select>
+          <Select size="small" value={status} onChange={(e) => setStatus(e.target.value)} sx={{ width: 160 }}>
+            {STATUS_FILTER_OPTIONS.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </Stack>
+      </Paper>
+
+      {filtered.length === 0 && (
+        <Typography color="text.disabled">No listings match your filters.</Typography>
       )}
 
       <Box
@@ -68,10 +178,10 @@ export default function ShowcaseClient({
           gap: 3,
         }}
       >
-        {listings.map((l) => (
+        {filtered.map((l) => (
           <Card key={l.id} sx={{ cursor: 'pointer' }} onClick={() => setSelected(l)}>
             {l.imageUrls[0] ? (
-              <CardMedia component="img" height="180" image={l.imageUrls[0]} alt={l.address} />
+              <CardMedia component="img" height="180" image={optimizeImageUrl(l.imageUrls[0], 600)} alt={l.address} />
             ) : (
               <Box sx={{ height: 180, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Typography variant="caption" color="text.disabled">
@@ -122,7 +232,7 @@ export default function ShowcaseClient({
             </DialogTitle>
             <DialogContent>
               {selected.imageUrls.map((url, i) => (
-                <Box key={i} component="img" src={url} sx={{ width: '100%', borderRadius: 1, mb: 1.5 }} />
+                <Box key={i} component="img" src={optimizeImageUrl(url, 1200)} sx={{ width: '100%', borderRadius: 1, mb: 1.5 }} />
               ))}
               {selected.price && (
                 <Typography variant="h6" color="primary" sx={{ fontWeight: 700, mb: 1 }}>

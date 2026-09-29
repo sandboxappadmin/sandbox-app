@@ -583,6 +583,11 @@ model ListingPage {
   listingIds Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+    agentName String?
+  agentPhone String?
+  agentEmail String?
+  agentPhotoUrl String?
+  agentBio String?
 
   nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
   nicheInstallId String @unique

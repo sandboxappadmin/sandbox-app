@@ -15,9 +15,11 @@ const MAX_MB = 10;
 export default function ImageUploader({
   urls,
   onChange,
+  label = 'Upload Photos',
 }: {
   urls: string[];
   onChange: (urls: string[]) => void;
+  label?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -106,14 +108,14 @@ export default function ImageUploader({
           if (e.target.files && e.target.files.length > 0) handleFiles(e.target.files);
         }}
       />
-      <Button
+            <Button
         variant="outlined"
         size="small"
         startIcon={uploading ? <CircularProgress size={16} /> : <AddPhotoAlternateIcon />}
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
       >
-        {uploading ? 'Uploading...' : 'Upload Photos'}
+        {uploading ? 'Uploading...' : label}
       </Button>
     </Box>
   );

@@ -2,6 +2,8 @@
 
 ## September 28, 2026
 - You can now upload photos straight from your phone or computer when adding or editing a listing, instead of pasting image links
+- Your listing page now shows your photo, name, and contact info, so visitors know who to reach out to
+- Visitors can filter listings by price, bedrooms, and status right on your showcase page
 
 ## September 26, 2026
 - The Desktop screen now only shows the workspaces you've actually installed, with a clear way to add more anytime

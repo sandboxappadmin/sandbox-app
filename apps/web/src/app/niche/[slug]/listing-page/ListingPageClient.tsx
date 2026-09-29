@@ -11,9 +11,20 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Alert from '@mui/material/Alert';
 import { saveListingPage } from './actions';
 import { useState, useTransition, useEffect } from 'react';
+import ImageUploader from '../listings/ImageUploader';
 
 type Listing = { id: string; address: string; status: string };
-type PageData = { pageSlug: string; title: string; description: string; listingIds: string[] };
+type PageData = {
+  pageSlug: string;
+  title: string;
+  description: string;
+  listingIds: string[];
+  agentName: string;
+  agentPhone: string;
+  agentEmail: string;
+  agentPhotoUrl: string;
+  agentBio: string;
+};
 
 export default function ListingPageClient({
   slug,
@@ -24,8 +35,18 @@ export default function ListingPageClient({
   initialPage: PageData | null;
   listings: Listing[];
 }) {
-  const [form, setForm] = useState<PageData>(
-    initialPage ?? { pageSlug: slug, title: '', description: '', listingIds: [] }
+    const [form, setForm] = useState<PageData>(
+    initialPage ?? {
+      pageSlug: slug,
+      title: '',
+      description: '',
+      listingIds: [],
+      agentName: '',
+      agentPhone: '',
+      agentEmail: '',
+      agentPhotoUrl: '',
+      agentBio: '',
+    }
   );
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -95,6 +116,55 @@ const [origin, setOrigin] = useState('');
             label="Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
+            fullWidth
+            multiline
+            minRows={2}
+          />
+        </Stack>
+      </Paper>
+
+            <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
+          Agent Contact
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Shown to visitors so they know who to reach out to.
+        </Typography>
+        <Stack spacing={2}>
+          <Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Photo
+            </Typography>
+                        <ImageUploader
+              urls={form.agentPhotoUrl ? [form.agentPhotoUrl] : []}
+              onChange={(urls) => setForm({ ...form, agentPhotoUrl: urls[urls.length - 1] ?? '' })}
+              label={form.agentPhotoUrl ? 'Replace Photo' : 'Upload Photo'}
+            />
+          </Box>
+          <TextField
+            label="Name"
+            value={form.agentName}
+            onChange={(e) => setForm({ ...form, agentName: e.target.value })}
+            fullWidth
+          />
+          <Stack direction="row" spacing={2}>
+            <TextField
+              label="Phone"
+              value={form.agentPhone}
+              onChange={(e) => setForm({ ...form, agentPhone: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Email"
+              value={form.agentEmail}
+              onChange={(e) => setForm({ ...form, agentEmail: e.target.value })}
+              fullWidth
+            />
+          </Stack>
+          <TextField
+            label="Short Bio"
+            value={form.agentBio}
+            onChange={(e) => setForm({ ...form, agentBio: e.target.value })}
             fullWidth
             multiline
             minRows={2}

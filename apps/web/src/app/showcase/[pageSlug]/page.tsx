@@ -25,5 +25,22 @@ export default async function ShowcasePage({ params }: { params: Promise<{ pageS
     imageUrls: (l.imageUrls as string[] | null) ?? [],
   }));
 
-  return <ShowcaseClient title={listingPage.title} description={listingPage.description} listings={serialized} />;
+    return (
+    <ShowcaseClient
+      title={listingPage.title}
+      description={listingPage.description}
+      listings={serialized}
+      agent={
+        listingPage.agentName || listingPage.agentPhone || listingPage.agentEmail
+          ? {
+              name: listingPage.agentName,
+              phone: listingPage.agentPhone,
+              email: listingPage.agentEmail,
+              photoUrl: listingPage.agentPhotoUrl,
+              bio: listingPage.agentBio,
+            }
+          : null
+      }
+    />
+  );
 }

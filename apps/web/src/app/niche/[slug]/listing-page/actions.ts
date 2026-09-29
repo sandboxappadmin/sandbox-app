@@ -6,7 +6,17 @@ import { getCurrentNicheInstall } from '@/lib/niche-server';
 
 export async function saveListingPage(
   slug: string,
-  data: { pageSlug: string; title: string; description: string; listingIds: string[] }
+  data: {
+    pageSlug: string;
+    title: string;
+    description: string;
+    listingIds: string[];
+    agentName: string;
+    agentPhone: string;
+    agentEmail: string;
+    agentPhotoUrl: string;
+    agentBio: string;
+  }
 ) {
   const { install } = await getCurrentNicheInstall(slug);
 
@@ -25,16 +35,22 @@ export async function saveListingPage(
     throw new Error('That page URL is already taken. Please choose another.');
   }
 
+  const shared = {
+    slug: cleanSlug,
+    title: data.title,
+    description: data.description,
+    listingIds: data.listingIds as any,
+    agentName: data.agentName.trim() || null,
+    agentPhone: data.agentPhone.trim() || null,
+    agentEmail: data.agentEmail.trim() || null,
+    agentPhotoUrl: data.agentPhotoUrl.trim() || null,
+    agentBio: data.agentBio.trim() || null,
+  };
+
   await prisma.listingPage.upsert({
     where: { nicheInstallId: install.id },
-    update: { slug: cleanSlug, title: data.title, description: data.description, listingIds: data.listingIds as any },
-    create: {
-      nicheInstallId: install.id,
-      slug: cleanSlug,
-      title: data.title,
-      description: data.description,
-      listingIds: data.listingIds as any,
-    },
+    update: shared,
+    create: { nicheInstallId: install.id, ...shared },
   });
 
   revalidatePath(`/niche/${slug}/listing-page`);

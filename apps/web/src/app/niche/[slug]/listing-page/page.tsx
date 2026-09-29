@@ -11,7 +11,7 @@ export default async function ListingPageSettingsPage({ params }: { params: Prom
     prisma.listing.findMany({ where: { nicheInstallId: install.id }, orderBy: { createdAt: 'desc' } }),
   ]);
 
-  return (
+    return (
     <ListingPageClient
       slug={slug}
       initialPage={
@@ -21,6 +21,11 @@ export default async function ListingPageSettingsPage({ params }: { params: Prom
               title: listingPage.title,
               description: listingPage.description ?? '',
               listingIds: (listingPage.listingIds as string[]) ?? [],
+              agentName: listingPage.agentName ?? '',
+              agentPhone: listingPage.agentPhone ?? '',
+              agentEmail: listingPage.agentEmail ?? '',
+              agentPhotoUrl: listingPage.agentPhotoUrl ?? '',
+              agentBio: listingPage.agentBio ?? '',
             }
           : null
       }

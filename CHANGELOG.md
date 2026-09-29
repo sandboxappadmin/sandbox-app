@@ -2,6 +2,18 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.30.0] - 2026-09-28
+
+### Added
+- Agent contact card on the public listing showcase page: photo, name, short bio, and Call/Email buttons, configured from Listing Page settings
+- Price, bedroom, and status filters on the showcase page, applied instantly in the browser against the workspace's listings
+
+### Fixed
+- ImageUploader's button now reads "Upload Photo" or "Replace Photo" depending on whether one is already set, for the single-photo agent use case, while the multi-photo listing use case keeps "Upload Photos"
+
+### Learned
+- Filtering entirely in the browser was the right call at this scale (a handful to a few dozen listings per workspace) — instant, no new endpoint, no pagination to design yet
+
 ## [0.29.0] - 2026-09-28
 
 ### Added
