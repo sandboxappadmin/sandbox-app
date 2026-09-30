@@ -2,6 +2,16 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.32.0] - 2026-09-29
+
+### Added
+- Mobile-responsive navigation shell for the internal app: NicheShell's sidebar becomes a swipeable, off-canvas drawer below tablet width instead of a permanently visible rail, opened by a hamburger icon in a compact sticky top bar
+- DesktopHeader collapses its row of icons (Super Admin, Updates, Feedback, Support, Team, Account Settings) into a single three-dot menu on phone-width screens, keeping only the notification bell and user button always visible
+
+### Learned
+- Public-facing pages built earlier tonight (homepage, showcase page, lead form, booking page) already had responsive breakpoints from the start and needed no rework here — worth carrying that habit into every new screen from now on, rather than treating mobile as a retrofit
+- Building the same nav item list once and rendering it two ways (icon row on desktop, dropdown menu on mobile) avoids the two versions quietly drifting apart as items get added or permission checks change later
+
 ## [0.31.0] - 2026-09-29
 
 ### Added
