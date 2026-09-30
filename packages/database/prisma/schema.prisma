@@ -566,6 +566,8 @@ model Listing {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
     imageUrls Json?
+    latitude Float?
+  longitude Float?
 
   nicheInstall NicheInstall @relation(fields: [nicheInstallId], references: [id])
   nicheInstallId String

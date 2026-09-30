@@ -23,6 +23,8 @@ export default async function ShowcasePage({ params }: { params: Promise<{ pageS
     status: l.status,
     description: l.description,
     imageUrls: (l.imageUrls as string[] | null) ?? [],
+        latitude: l.latitude,
+    longitude: l.longitude,
   }));
 
     return (
@@ -37,7 +39,7 @@ export default async function ShowcasePage({ params }: { params: Promise<{ pageS
               phone: listingPage.agentPhone,
               email: listingPage.agentEmail,
               photoUrl: listingPage.agentPhotoUrl,
-              bio: listingPage.agentBio,
+              bio: listingPage.agentBio
             }
           : null
       }

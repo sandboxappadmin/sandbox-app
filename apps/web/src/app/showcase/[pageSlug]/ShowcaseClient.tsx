@@ -25,6 +25,9 @@ import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import { optimizeImageUrl } from '@/lib/image-url';
+import dynamic from 'next/dynamic';
+
+const ListingsMap = dynamic(() => import('./ListingsMap'), { ssr: false });
 
 type Listing = {
   id: string;
@@ -36,6 +39,8 @@ type Listing = {
   status: string;
   description: string | null;
   imageUrls: string[];
+  latitude: number | null;
+  longitude: number | null;
 };
 
 type Agent = {
@@ -130,6 +135,8 @@ export default function ShowcaseClient({
           </Stack>
         </Paper>
       )}
+
+            <ListingsMap listings={filtered} />
 
       <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
         <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', gap: 2 }}>

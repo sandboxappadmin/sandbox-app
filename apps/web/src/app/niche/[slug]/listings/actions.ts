@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@repo/database';
 import { getCurrentNicheInstall } from '@/lib/niche-server';
+import { geocodeAddress } from '@/lib/geocode';
 
 type ListingInput = {
   address: string;
@@ -24,6 +25,7 @@ function toNumberOrNull(value: string): number | null {
 
 export async function createListing(slug: string, data: ListingInput) {
   const { install } = await getCurrentNicheInstall(slug);
+    const coords = await geocodeAddress(data.address.trim());
 
   await prisma.listing.create({
     data: {
@@ -38,6 +40,8 @@ export async function createListing(slug: string, data: ListingInput) {
             imageUrls: data.imageUrls
         ? (data.imageUrls.split('\n').map((u) => u.trim()).filter(Boolean) as any)
         : [],
+              latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
     },
   });
 
@@ -46,6 +50,7 @@ export async function createListing(slug: string, data: ListingInput) {
 
 export async function updateListing(slug: string, listingId: string, data: ListingInput) {
   const { install } = await getCurrentNicheInstall(slug);
+    const coords = await geocodeAddress(data.address.trim());
 
   await prisma.listing.updateMany({
     where: { id: listingId, nicheInstallId: install.id },
@@ -60,6 +65,8 @@ export async function updateListing(slug: string, listingId: string, data: Listi
             imageUrls: data.imageUrls
         ? (data.imageUrls.split('\n').map((u) => u.trim()).filter(Boolean) as any)
         : [],
+              latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
     },
   });
 

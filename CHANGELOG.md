@@ -2,6 +2,20 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.31.0] - 2026-09-29
+
+### Added
+- Map view on the public listing showcase page, showing a pin for each listing with a working address. Built with Leaflet and OpenStreetMap tiles rather than Google Maps, avoiding a paid API and the card-on-file requirement that comes with it
+- Listing addresses are geocoded automatically when a listing is created or updated, using OpenStreetMap's free Nominatim service, with the resulting coordinates cached on the Listing so the showcase page never re-geocodes on every visit
+- Map pins respect the same price, bedroom, and status filters as the listing grid below it
+
+### Fixed
+- react-leaflet was pinned to a version that only supports React 18 as a peer dependency, conflicting with the React 19 this project runs on. Bumped to react-leaflet v5, which supports React 19
+
+### Learned
+- A listing with an address Nominatim can't resolve saves successfully but silently gets no coordinates, no pin, and no error. Worth checking a listing's stored latitude and longitude directly if a pin doesn't show up as expected, rather than assuming the feature is broken
+- Checking a peer dependency's supported React version before installing would have avoided the eresolve conflict here; worth doing for any new UI library going forward given this project is on React 19
+
 ## [0.30.0] - 2026-09-28
 
 ### Added
