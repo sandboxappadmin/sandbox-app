@@ -2,6 +2,19 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.33.0] - 2026-09-29
+
+### Added
+- Responsive card views for the three remaining DataGrid screens: Contacts, the admin Accounts list, and the admin ticket queue. Each renders the normal table on desktop and a stacked list of cards with a three-dot action menu on mobile
+- Row actions (edit, delete, suspend, grant free access, and the rest of the Accounts screen's eight conditional actions) are now built from one shared function consumed by both the desktop grid and the mobile card, so the two views can't drift out of sync as actions are added or changed later
+
+### Fixed
+- Contacts' header buttons and the lead-form link card now stack vertically on narrow screens instead of forcing a horizontal row that overflowed
+- SupportClient's customer-facing ticket list was already built as cards rather than a table and needed no structural change, only the same header stacking fix as Contacts
+
+### Learned
+- Extracting a getRowActions function that returns plain data, rather than duplicating the conditional logic once for GridActionsCellItem elements and again for menu items, keeps a screen's business rules (which actions are valid in which account state) in exactly one place even though they're rendered two different ways
+
 ## [0.32.0] - 2026-09-29
 
 ### Added

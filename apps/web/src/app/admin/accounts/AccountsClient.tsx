@@ -22,6 +22,10 @@ import DialogActions from '@mui/material/DialogActions';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import { setRenewalDate } from './date-actions';
 import Button from '@mui/material/Button';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import Stack from '@mui/material/Stack';
+import AccountCard, { RowAction } from './AccountCard';
 
 type Status = 'ACTIVE' | 'SUSPENDED' | 'DELETED';
 
@@ -49,6 +53,8 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
   const [error, setError] = useState<string | null>(null);
   const [editingRow, setEditingRow] = useState<Row | null>(null);
   const [editDate, setEditDate] = useState('');
+    const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const runAction = (fn: (id: string) => Promise<void>, id: string) => {
     setError(null);
@@ -244,6 +250,34 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
     },
   ];
 
+    const getRowActions = (row: Row): RowAction[] => {
+    const actions: RowAction[] = [];
+
+    if (row.subscriptionStatus === 'TRIALING' || row.subscriptionStatus === 'ACTIVE') {
+      actions.push({ key: 'edit-date', label: 'Edit Renewal Date', icon: EditCalendarIcon, onClick: openDateEditor });
+    }
+    if (row.status === 'ACTIVE') {
+      actions.push({ key: 'suspend', label: 'Suspend', icon: PauseCircleIcon, onClick: handleSuspend });
+    }
+    if (row.status === 'SUSPENDED') {
+      actions.push({ key: 'reactivate', label: 'Reactivate', icon: PlayCircleIcon, onClick: handleReactivate });
+    }
+    if (row.subscriptionStatus === 'COMP') {
+      actions.push({ key: 'revert-trial', label: 'Revert to Trial', icon: HistoryIcon, onClick: handleRevertToTrial });
+    }
+    if (row.status !== 'DELETED') {
+      actions.push({ key: 'delete', label: 'Delete', icon: DeleteIcon, onClick: handleDelete });
+    }
+    if (row.subscriptionStatus !== 'COMP') {
+      actions.push({ key: 'force-expired', label: 'Force Trial Expired', icon: HourglassEmptyIcon, onClick: handleForceTrialExpired });
+    }
+    if (row.subscriptionStatus === 'ACTIVE') {
+      actions.push({ key: 'force-sub-expired', label: 'Force Subscription Expired', icon: EventBusyIcon, onClick: handleForceSubscriptionExpired });
+    }
+
+    return actions;
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -259,14 +293,22 @@ export default function AccountsClient({ rows }: { rows: Row[] }) {
         </Alert>
       )}
 
-      <Box sx={{ height: 600, bgcolor: 'background.paper', borderRadius: 1 }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          disableRowSelectionOnClick
-          initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
-        />
-      </Box>
+            {isMobile ? (
+        <Stack spacing={1.5}>
+          {rows.map((row) => (
+            <AccountCard key={row.id} row={row} actions={getRowActions(row)} isPending={isPending} />
+          ))}
+        </Stack>
+      ) : (
+        <Box sx={{ height: 600, bgcolor: 'background.paper', borderRadius: 1 }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            disableRowSelectionOnClick
+            initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
+          />
+        </Box>
+      )}
 
             <Dialog open={Boolean(editingRow)} onClose={() => setEditingRow(null)}>
         <DialogTitle>Edit Renewal Date — {editingRow?.name}</DialogTitle>

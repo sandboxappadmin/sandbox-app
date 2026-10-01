@@ -37,6 +37,9 @@ import ChatIcon from '@mui/icons-material/Chat';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CsvImportDialog from './CsvImportDialog';
 import Paper from '@mui/material/Paper';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import ContactCard from './ContactCard';
 
 type Tag = { id: string; name: string };
 
@@ -260,6 +263,8 @@ export default function ContactsClient({
   nicheInstallId: string;
 }) {
   const router = useRouter();
+    const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -363,21 +368,41 @@ export default function ContactsClient({
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1.5,
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Contacts
         </Typography>
         <Stack direction="row" spacing={1.5}>
-          <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={() => setImportOpen(true)}>
+          <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={() => setImportOpen(true)} sx={{ flex: { xs: 1, sm: 'none' } }}>
             Import CSV
           </Button>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog} sx={{ flex: { xs: 1, sm: 'none' } }}>
             Add Contact
           </Button>
         </Stack>
       </Box>
 
-            <Paper variant="outlined" sx={{ p: 2, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+          mb: 2,
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: 1.5,
+        }}
+      >
         <Box>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
             Your public lead form
@@ -403,17 +428,37 @@ export default function ContactsClient({
         </Alert>
       )}
 
-      <Box sx={{ height: 500, bgcolor: 'background.paper', borderRadius: 1 }}>
-        <DataGrid
-          rows={initialContacts}
-          columns={columns}
-          disableRowSelectionOnClick
-          getRowHeight={() => 'auto'}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
-        />
-      </Box>
+            {isMobile ? (
+        <Stack spacing={1.5}>
+          {initialContacts.map((contact) => (
+            <ContactCard
+              key={contact.id}
+              contact={contact}
+              tagsCell={<TagsCell slug={slug} contact={contact} allTags={allTags} />}
+              onEdit={() => openEditDialog(contact)}
+              onDelete={() => handleDelete(contact)}
+              onOpenMessages={() => router.push(`/niche/${slug}/contacts/${contact.id}`)}
+            />
+          ))}
+          {initialContacts.length === 0 && (
+            <Typography variant="body2" color="text.disabled" sx={{ textAlign: 'center', py: 4 }}>
+              No contacts yet.
+            </Typography>
+          )}
+        </Stack>
+      ) : (
+        <Box sx={{ height: 500, bgcolor: 'background.paper', borderRadius: 1 }}>
+          <DataGrid
+            rows={initialContacts}
+            columns={columns}
+            disableRowSelectionOnClick
+            getRowHeight={() => 'auto'}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10 } },
+            }}
+          />
+        </Box>
+      )}
 
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>{editingId ? 'Edit Contact' : 'Add Contact'}</DialogTitle>

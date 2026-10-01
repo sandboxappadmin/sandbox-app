@@ -55,7 +55,16 @@ export default function SupportClient({ tickets }: { tickets: Ticket[] }) {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1.5,
+          mb: 1,
+        }}
+      >
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Support
         </Typography>
