@@ -2,6 +2,17 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.34.0] - 2026-09-29
+
+### Fixed
+- Pipeline board's drag and drop now uses separate mouse and touch sensors instead of one shared PointerSensor. Touch requires a brief press-and-hold before a drag starts, so a quick swipe scrolls the board instead of being misread as picking up a card
+- Opportunity cards' edit and delete icons, previously only visible on hover, now stay visible on mobile where hover doesn't exist
+- Added touchAction CSS to cards and the scroll container so the browser's native touch scrolling and dnd-kit's drag gesture no longer compete for the same touch, which is what made dragging feel unreliable on a phone even with the sensor fix alone
+
+### Learned
+- The board's existing click-and-drag canvas panning is built entirely on mouse events and was already inert on touch without needing to be explicitly disabled, since MouseEvent handlers simply never fire for touch input
+- dnd-kit's own documented pattern for a draggable list that also needs to scroll on touch is exactly this: a distance-based MouseSensor plus a delay-based TouchSensor, rather than one PointerSensor trying to serve both input types with one activation rule
+
 ## [0.33.0] - 2026-09-29
 
 ### Added

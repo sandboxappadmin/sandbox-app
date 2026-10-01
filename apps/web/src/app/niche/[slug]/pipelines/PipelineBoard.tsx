@@ -5,7 +5,8 @@ import {
   DndContext,
   useDraggable,
   useDroppable,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -22,6 +23,8 @@ import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Stack from '@mui/material/Stack';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -43,10 +46,12 @@ function OpportunityCard({
   opp,
   onEdit,
   onDelete,
+  isMobile,
 }: {
   opp: Opportunity;
   onEdit: () => void;
   onDelete: () => void;
+  isMobile: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: opp.id });
 
@@ -64,6 +69,11 @@ function OpportunityCard({
         transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
         position: 'relative',
         zIndex: isDragging ? 10 : 'auto',
+        // Without this, a touch-drag gesture competes with the browser's
+        // own scroll/zoom handling, which is what makes dragging feel
+        // janky or unresponsive on a phone.
+        touchAction: 'none',
+        WebkitTouchCallout: 'none',
         '&:hover .opp-actions': { opacity: 1 },
       }}
     >
@@ -73,7 +83,9 @@ function OpportunityCard({
           position: 'absolute',
           top: 2,
           right: 2,
-          opacity: 0,
+          // Hover doesn't exist on a touchscreen, so these need to just
+          // always be visible on mobile rather than reveal-on-hover.
+          opacity: isMobile ? 1 : 0,
           transition: 'opacity 0.15s ease',
           bgcolor: 'background.paper',
           borderRadius: 1,
@@ -108,12 +120,14 @@ function StageColumn({
   onToggle,
   onEditCard,
   onDeleteCard,
+  isMobile,
 }: {
   stage: Stage;
   collapsed: boolean;
   onToggle: () => void;
   onEditCard: (opp: Opportunity) => void;
   onDeleteCard: (opp: Opportunity) => void;
+  isMobile: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.id });
 
@@ -177,6 +191,7 @@ function StageColumn({
           opp={opp}
           onEdit={() => onEditCard(opp)}
           onDelete={() => onDeleteCard(opp)}
+          isMobile={isMobile}
         />
       ))}
     </Box>
@@ -200,6 +215,9 @@ export default function PipelineBoard({
   stages: Stage[];
   contacts: Contact[];
 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const [stages, setStages] = useState(initialStages);
   const [collapsedStages, setCollapsedStages] = useState<Set<string>>(
     () => new Set(initialStages.filter((s) => s.opportunities.length === 0).map((s) => s.id))
@@ -209,7 +227,15 @@ export default function PipelineBoard({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  // Mouse keeps the existing short-distance activation. Touch gets a
+  // press-and-hold delay instead of a distance threshold, so a quick swipe
+  // scrolls the board normally and only a deliberate hold-then-move starts
+  // a drag. This is dnd-kit's own recommended pattern for a draggable list
+  // that also needs to scroll on touch devices.
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } })
+  );
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const panState = useRef({ isPanning: false, startX: 0, startScrollLeft: 0 });
@@ -356,6 +382,10 @@ export default function PipelineBoard({
             flexGrow: 1,
             cursor: 'grab',
             userSelect: 'none',
+            // Allows native horizontal touch scrolling on blank canvas
+            // space between columns, while each card above overrides this
+            // to touchAction: 'none' so dnd-kit can own the gesture there.
+            touchAction: 'pan-x',
             '&::-webkit-scrollbar': { display: 'none' },
             scrollbarWidth: 'none',
           }}
@@ -368,6 +398,7 @@ export default function PipelineBoard({
               onToggle={() => toggleStage(stage.id)}
               onEditCard={openEditDialog}
               onDeleteCard={handleDelete}
+              isMobile={isMobile}
             />
           ))}
         </Box>

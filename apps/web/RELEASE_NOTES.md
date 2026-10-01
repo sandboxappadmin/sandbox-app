@@ -1,5 +1,8 @@
 # Updates
 
+## September 29, 2026
+- Sandbox App is now genuinely usable from a phone: the navigation, Contacts, Accounts, the ticket queue, and the pipeline board all adapt to a smaller screen instead of requiring a desktop
+
 ## September 28, 2026
 - You can now upload photos straight from your phone or computer when adding or editing a listing, instead of pasting image links
 - Your listing page now shows your photo, name, and contact info, so visitors know who to reach out to
