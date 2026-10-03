@@ -2,6 +2,16 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.35.0] - 2026-09-29
+
+### Fixed
+- AdminShell's sidebar now becomes an off-canvas swipeable drawer on mobile, matching the pattern already applied to NicheShell, instead of a permanently pushed-open sidebar
+- Listings and Admin Suggestions, the last two remaining DataGrid screens, now render as cards on mobile with the same pattern used for Contacts, Accounts, and the ticket queue. Listing cards include a photo thumbnail
+- Five rows across Settings availability, Team invites and members, Recommended Tools, and Appointments now stack vertically on narrow screens instead of squeezing a label, a dropdown, and a button onto one line
+
+### Learned
+- A structural change to a client component, like adding a new conditional render branch, can survive a file save under hot reload without the browser actually picking it up, producing a false negative where the fix looks broken but the real issue is a stale build. Worth a full stop, restart, and hard reload before concluding a fix didn't work
+
 ## [0.34.0] - 2026-09-29
 
 ### Fixed

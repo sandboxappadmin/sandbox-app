@@ -6,6 +6,10 @@ import Typography from '@mui/material/Typography';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Chip from '@mui/material/Chip';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { updateSuggestionStatus } from './actions';
 
@@ -50,6 +54,9 @@ function StatusCell({ row }: { row: Row }) {
 }
 
 export default function AdminSuggestionsClient({ rows }: { rows: Row[] }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const columns: GridColDef<Row>[] = [
     { field: 'voteCount', headerName: 'Votes', width: 80 },
     { field: 'title', headerName: 'Title', flex: 1 },
@@ -73,15 +80,44 @@ export default function AdminSuggestionsClient({ rows }: { rows: Row[] }) {
       <Typography variant="h4" sx={{ fontWeight: 600, mb: 3 }}>
         Suggestions
       </Typography>
-      <Box sx={{ height: 600, bgcolor: 'background.paper', borderRadius: 1 }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          disableRowSelectionOnClick
-          getRowHeight={() => 'auto'}
-          initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
-        />
-      </Box>
+
+      {isMobile ? (
+        <Stack spacing={1.5}>
+          {rows.map((row) => (
+            <Paper key={row.id} variant="outlined" sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    {row.title}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {row.authorName} · {row.voteCount} vote{row.voteCount === 1 ? '' : 's'} ·{' '}
+                    {new Date(row.createdAt).toLocaleDateString()}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ mt: 1.5 }}>
+                <StatusCell row={row} />
+              </Box>
+            </Paper>
+          ))}
+          {rows.length === 0 && (
+            <Typography variant="body2" color="text.disabled" sx={{ textAlign: 'center', py: 4 }}>
+              No suggestions yet.
+            </Typography>
+          )}
+        </Stack>
+      ) : (
+        <Box sx={{ height: 600, bgcolor: 'background.paper', borderRadius: 1 }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            disableRowSelectionOnClick
+            getRowHeight={() => 'auto'}
+            initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
+          />
+        </Box>
+      )}
     </Box>
   );
 }

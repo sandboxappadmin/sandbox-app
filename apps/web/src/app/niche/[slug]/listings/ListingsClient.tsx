@@ -20,6 +20,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createListing, updateListing, deleteListing } from './actions';
 import ImageUploader from './ImageUploader';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import ListingCard from './ListingCard';
 
 type Listing = {
   id: string;
@@ -59,6 +62,8 @@ export default function ListingsClient({ slug, initialListings }: { slug: string
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+    const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const openCreate = () => {
     setEditingId(null);
@@ -143,7 +148,16 @@ export default function ListingsClient({ slug, initialListings }: { slug: string
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1.5,
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Listings
         </Typography>
@@ -158,9 +172,27 @@ export default function ListingsClient({ slug, initialListings }: { slug: string
         </Alert>
       )}
 
-      <Box sx={{ height: 500, bgcolor: 'background.paper', borderRadius: 1 }}>
-        <DataGrid rows={initialListings} columns={columns} disableRowSelectionOnClick initialState={{ pagination: { paginationModel: { pageSize: 10 } } }} />
-      </Box>
+            {isMobile ? (
+        <Stack spacing={1.5}>
+          {initialListings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              onEdit={() => openEdit(listing)}
+              onDelete={() => handleDelete(listing)}
+            />
+          ))}
+          {initialListings.length === 0 && (
+            <Typography variant="body2" color="text.disabled" sx={{ textAlign: 'center', py: 4 }}>
+              No listings yet.
+            </Typography>
+          )}
+        </Stack>
+      ) : (
+        <Box sx={{ height: 500, bgcolor: 'background.paper', borderRadius: 1 }}>
+          <DataGrid rows={initialListings} columns={columns} disableRowSelectionOnClick initialState={{ pagination: { paginationModel: { pageSize: 10 } } }} />
+        </Box>
+      )}
 
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>{editingId ? 'Edit Listing' : 'Add Listing'}</DialogTitle>

@@ -34,7 +34,16 @@ export default function AppointmentsClient({
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1.5,
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Appointments
         </Typography>
@@ -55,7 +64,18 @@ export default function AppointmentsClient({
 
       <Stack spacing={1.5}>
         {appointments.map((a) => (
-          <Paper key={a.id} variant="outlined" sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Paper
+            key={a.id}
+            variant="outlined"
+            sx={{
+              p: 2,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: 1,
+            }}
+          >
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {new Date(a.startsAt).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })}

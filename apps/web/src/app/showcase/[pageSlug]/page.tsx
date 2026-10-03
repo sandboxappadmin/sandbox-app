@@ -39,7 +39,7 @@ export default async function ShowcasePage({ params }: { params: Promise<{ pageS
               phone: listingPage.agentPhone,
               email: listingPage.agentEmail,
               photoUrl: listingPage.agentPhotoUrl,
-              bio: listingPage.agentBio
+              bio: listingPage.agentBio,
             }
           : null
       }

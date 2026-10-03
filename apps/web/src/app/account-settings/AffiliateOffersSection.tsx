@@ -27,12 +27,14 @@ export default function AffiliateOffersSection() {
           </Typography>
           <Stack spacing={1.5} sx={{ mt: 1 }}>
             {AFFILIATE_OFFERS.filter((o) => o.category === category).map((offer) => (
-              <Box
+                            <Box
                 key={offer.id}
                 sx={{
                   display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
                   justifyContent: 'space-between',
-                  alignItems: 'center',
+                  alignItems: { xs: 'flex-start', sm: 'center' },
+                  gap: 1.5,
                   p: 1.5,
                   border: '1px solid',
                   borderColor: 'divider',
@@ -54,6 +56,7 @@ export default function AffiliateOffersSection() {
                   href={offer.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  sx={{ flexShrink: 0, alignSelf: { xs: 'stretch', sm: 'center' } }}
                 >
                   View
                 </Button>

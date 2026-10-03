@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
+import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -12,9 +14,12 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import Chip from '@mui/material/Chip';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BusinessIcon from '@mui/icons-material/Business';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MenuIcon from '@mui/icons-material/Menu';
 import { UserButton } from '@clerk/nextjs';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
@@ -24,13 +29,83 @@ const DRAWER_WIDTH = 240;
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = [
     { label: 'Overview', icon: DashboardIcon, href: '/admin' },
     { label: 'Accounts', icon: BusinessIcon, href: '/admin/accounts' },
-        { label: 'Tickets', icon: ConfirmationNumberIcon, href: '/admin/tickets' },
-            { label: 'Suggestions', icon: LightbulbIcon, href: '/admin/suggestions' },
+    { label: 'Tickets', icon: ConfirmationNumberIcon, href: '/admin/tickets' },
+    { label: 'Suggestions', icon: LightbulbIcon, href: '/admin/suggestions' },
   ];
+
+  const handleNavigate = (href: string) => {
+    router.push(href);
+    if (isMobile) setMobileOpen(false);
+  };
+
+  const drawerContent = (
+    <>
+      <Toolbar>
+        <IconButton onClick={() => router.push('/desktop')} sx={{ mr: 1 }}>
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        <Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Super Admin
+          </Typography>
+          <Chip size="small" label="Platform-wide" color="error" variant="outlined" />
+        </Box>
+      </Toolbar>
+      <List>
+        {navItems.map(({ label, icon: Icon, href }) => (
+          <ListItemButton key={href} selected={pathname === href} onClick={() => handleNavigate(href)}>
+            <ListItemIcon>
+              <Icon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary={label} />
+          </ListItemButton>
+        ))}
+      </List>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Box sx={{ minHeight: '100vh' }}>
+        <AppBar
+          position="sticky"
+          color="default"
+          elevation={0}
+          sx={{ borderBottom: '1px solid', borderColor: 'divider', top: 0 }}
+        >
+          <Toolbar sx={{ justifyContent: 'space-between' }}>
+            <IconButton onClick={() => setMobileOpen(true)} edge="start">
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              Super Admin
+            </Typography>
+            <UserButton />
+          </Toolbar>
+        </AppBar>
+
+        <SwipeableDrawer
+          anchor="left"
+          open={mobileOpen}
+          onOpen={() => setMobileOpen(true)}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{ keepMounted: true }}
+          sx={{ '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' } }}
+        >
+          {drawerContent}
+        </SwipeableDrawer>
+
+        <Box sx={{ p: 2 }}>{children}</Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -42,27 +117,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' },
         }}
       >
-        <Toolbar>
-          <IconButton onClick={() => router.push('/desktop')} sx={{ mr: 1 }}>
-            <ArrowBackIcon fontSize="small" />
-          </IconButton>
-          <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Super Admin
-            </Typography>
-            <Chip size="small" label="Platform-wide" color="error" variant="outlined" />
-          </Box>
-        </Toolbar>
-        <List>
-          {navItems.map(({ label, icon: Icon, href }) => (
-            <ListItemButton key={href} selected={pathname === href} onClick={() => router.push(href)}>
-              <ListItemIcon>
-                <Icon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={label} />
-            </ListItemButton>
-          ))}
-        </List>
+        {drawerContent}
       </Drawer>
 
       <Box sx={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>

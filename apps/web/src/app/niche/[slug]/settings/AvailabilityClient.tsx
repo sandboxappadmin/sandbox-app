@@ -51,9 +51,14 @@ export default function AvailabilityClient({ slug, initialRules }: { slug: strin
 
       <Stack spacing={1.5}>
         {DAYS.map((day, i) => (
-          <Stack key={day} direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                    <Stack
+            key={day}
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={{ xs: 0.5, sm: 2 }}
+            sx={{ alignItems: { xs: 'flex-start', sm: 'center' } }}
+          >
             <FormControlLabel
-              sx={{ width: 140 }}
+              sx={{ width: { xs: 'auto', sm: 140 } }}
               control={
                 <Checkbox
                   checked={enabled[i]}
@@ -62,21 +67,23 @@ export default function AvailabilityClient({ slug, initialRules }: { slug: strin
               }
               label={day}
             />
-            <TextField
-              type="time"
-              size="small"
-              value={times[i].start}
-              onChange={(e) => setTimes({ ...times, [i]: { ...times[i], start: e.target.value } })}
-              disabled={!enabled[i]}
-            />
-            <Typography variant="body2">to</Typography>
-            <TextField
-              type="time"
-              size="small"
-              value={times[i].end}
-              onChange={(e) => setTimes({ ...times, [i]: { ...times[i], end: e.target.value } })}
-              disabled={!enabled[i]}
-            />
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', pl: { xs: 4, sm: 0 } }}>
+              <TextField
+                type="time"
+                size="small"
+                value={times[i].start}
+                onChange={(e) => setTimes({ ...times, [i]: { ...times[i], start: e.target.value } })}
+                disabled={!enabled[i]}
+              />
+              <Typography variant="body2">to</Typography>
+              <TextField
+                type="time"
+                size="small"
+                value={times[i].end}
+                onChange={(e) => setTimes({ ...times, [i]: { ...times[i], end: e.target.value } })}
+                disabled={!enabled[i]}
+              />
+            </Stack>
           </Stack>
         ))}
       </Stack>

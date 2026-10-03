@@ -64,7 +64,7 @@ export default function TeamClient({
           </Alert>
         )}
 
-        <Stack direction="row" spacing={1.5}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
           <TextField
             size="small"
             placeholder="teammate@example.com"
@@ -72,13 +72,15 @@ export default function TeamClient({
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
           />
-          <Select size="small" value={role} onChange={(e) => setRole(e.target.value as 'ADMIN' | 'AGENT')}>
-            <MenuItem value="AGENT">Agent</MenuItem>
-            <MenuItem value="ADMIN">Admin</MenuItem>
-          </Select>
-          <Button variant="contained" onClick={handleInvite} disabled={isPending || !email.trim()}>
-            Invite
-          </Button>
+          <Stack direction="row" spacing={1.5}>
+            <Select size="small" value={role} onChange={(e) => setRole(e.target.value as 'ADMIN' | 'AGENT')} sx={{ flexGrow: { xs: 1, sm: 0 } }}>
+              <MenuItem value="AGENT">Agent</MenuItem>
+              <MenuItem value="ADMIN">Admin</MenuItem>
+            </Select>
+            <Button variant="contained" onClick={handleInvite} disabled={isPending || !email.trim()} sx={{ flexShrink: 0 }}>
+              Invite
+            </Button>
+          </Stack>
         </Stack>
       </Paper>
 
@@ -87,7 +89,18 @@ export default function TeamClient({
       </Typography>
       <Stack spacing={1.5} sx={{ mb: 3 }}>
         {members.map((m) => (
-          <Paper key={m.id} variant="outlined" sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Paper
+            key={m.id}
+            variant="outlined"
+            sx={{
+              p: 2,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: 1,
+            }}
+          >
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {m.name || m.email} {m.id === currentUserId && '(You)'}
