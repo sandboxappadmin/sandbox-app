@@ -2,6 +2,14 @@
 
 All notable changes to Sandbox App will be documented here.
 
+## [0.35.1] - 2026-09-29
+
+### Fixed
+- The GHL bundle price (79900 centavos) was hardcoded separately in billing/actions.ts and ghl-actions.ts. Both now import GHL_BUNDLE_PRICE_CENTAVOS from @repo/paymongo, so a future price change touches one file instead of two
+
+### Changed
+- Bumped recharts from 2.15.4 (deprecated) to 3.1.2. Checked the v3 breaking changes list first: all of it concerns the Customized component, internal state access, and already-deprecated props, none of which DashboardClient.tsx uses, so this was a clean upgrade with no code changes needed
+
 ## [0.35.0] - 2026-09-29
 
 ### Fixed

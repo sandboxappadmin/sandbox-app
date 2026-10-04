@@ -27,7 +27,7 @@
     "@repo/paymongo": "*",
     "@repo/sms": "*",
     "papaparse": "^5.4.1",
-    "recharts": "^2.12.7",
+    "recharts": "^3.1.2",
     "leaflet": "^1.9.4",
     "react-leaflet": "^5.0.0"
   },

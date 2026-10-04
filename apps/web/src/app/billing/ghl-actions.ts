@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@repo/database';
 import { assertOwner } from '@/lib/roles';
-import { createCheckoutSession } from '@repo/paymongo';
+import { createCheckoutSession, GHL_BUNDLE_PRICE_CENTAVOS } from '@repo/paymongo';
 
 export async function startGhlUpgradeCheckout(businessName: string, notes: string) {
   const user = await assertOwner();
@@ -33,7 +33,7 @@ export async function startGhlUpgradeCheckout(businessName: string, notes: strin
     user.email,
     `${baseUrl}/billing/success`,
     `${baseUrl}/billing/cancel`,
-    { name: 'Sandbox App + GHL Sub-Account — Monthly', amountCentavos: 79900 }
+    { name: 'Sandbox App + GHL Sub-Account — Monthly', amountCentavos: GHL_BUNDLE_PRICE_CENTAVOS }
   );
 
   if (!result.ok) {
